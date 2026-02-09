@@ -15,10 +15,13 @@ app.use(express.urlencoded({ extended: false }));
 
 // Routes
 app.use('/api/tasks', require('./routes/taskRoutes'));
-
 app.use("/api/auth", require("./routes/authRoutes"));
-
 app.use("/api/test", require("./routes/testRoutes"));
+
+app.use("/api/participant", require("./routes/participantRoutes"));
+app.use("/api/organizer", require("./routes/organizerRoutes"));
+app.use("/api/admin", require("./routes/adminRoutes"));
+
 
 
 // Basic route for testing
