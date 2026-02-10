@@ -1,61 +1,82 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import "../styles/auth.css";
-import { Link } from "react-router-dom";
-
 
 function Signup() {
+  const { user, login } = useAuth();   
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
 
+  useEffect(() => {
+   if (user) {
+      navigate(`/${user.role}/dashboard`);
+    }
+  }, [user, navigate]);
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
 
-    const res = await fetch("http://localhost:5000/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
 
-    if (!res.ok) {
-      setMessage(data.message);
-    } else {
-      setMessage("Signup successful! You can login now.");
+      login(data.token, data.user.role);
+    } 
+    
+    catch (err) {
+      setError(err.message);
+    } 
+    
+    finally {
+      setLoading(false);
     }
   };
 
+
   return (
     <div className="auth-container">
-      <form className="auth-card" onSubmit={handleSubmit}>
-        <h2>Create Account</h2>
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <h2>Sign up</h2>
 
         <input
           type="email"
           placeholder="Email"
-          required
           onChange={(e) => setEmail(e.target.value)}
+          required
         />
 
         <input
           type="password"
           placeholder="Password"
-          required
           onChange={(e) => setPassword(e.target.value)}
+          required
         />
 
-        <button type="submit">Sign Up</button>
+        <button disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
+        </button>
 
-        {message && <p className="auth-message">{message}</p>}
+        {error && <p className="error">{error}</p>}
 
-        <p className="auth-switch">
-            Already have an account? <Link to="/login">Login</Link>
+        <p>
+          No account? <Link to="/signup">Sign up</Link>
         </p>
-
       </form>
     </div>
   );
 }
 
 export default Signup;
+
