@@ -8,7 +8,8 @@ function Signup() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
    if (user) {
@@ -65,13 +66,13 @@ function Signup() {
         />
 
         <button disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
+          {loading ? "Signing up..." : "Sign up"}
         </button>
 
         {error && <p className="error">{error}</p>}
 
         <p>
-          No account? <Link to="/signup">Sign up</Link>
+          Already have an account? <Link to="/login">Login</Link>
         </p>
       </form>
     </div>

@@ -1,0 +1,1 @@
+1. Deleted task when fetching from participant side show null, they should simply not be recognised.

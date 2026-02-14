@@ -14,7 +14,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Routes
-app.use('/api/tasks', require('./routes/taskRoutes'));
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/test", require("./routes/testRoutes"));
 
@@ -22,14 +21,15 @@ app.use("/api/participant", require("./routes/participantRoutes"));
 app.use("/api/organizer", require("./routes/organizerRoutes"));
 app.use("/api/admin", require("./routes/adminRoutes"));
 
+app.use("/api/events", require("./routes/eventRoutes"));
+app.use("/api/registrations", require("./routes/registrationRoutes"));
 
-
-// Basic route for testing
+// route for testing
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to MERN API' });
 });
 
-// Error handler (optional but recommended)
+// Error handler 
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
