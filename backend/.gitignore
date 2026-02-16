@@ -1,3 +1,5 @@
 node_modules/
 .env
 .DS_Store
+.gitignore
+Assignment_1 -V3.pdf

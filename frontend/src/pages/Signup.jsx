@@ -8,6 +8,7 @@ function Signup() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [userType, setUserType] = useState("iiit-participant"); // Default to IIIT
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -17,17 +18,37 @@ function Signup() {
     }
   }, [user, navigate]);
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
+    // Validation
+    if (!email || !password) {
+      setError("Please fill in all fields");
+      setLoading(false);
+      return;
+    }
+
+    // Email validation for IIIT participants
+    if (userType === "iiit-participant" && !email.endsWith("@iiit.ac.in")) {
+      setError("IIIT participants must use @iiit.ac.in email address");
+      setLoading(false);
+      return;
+    }
+
+    // Warn if non-IIIT using IIIT domain
+    if (userType === "non-iiit-participant" && email.endsWith("@iiit.ac.in")) {
+      setError("IIIT email addresses must register as IIIT participant");
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch("http://localhost:5000/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, userType }),
       });
 
       const data = await res.json();
@@ -45,24 +66,53 @@ function Signup() {
     }
   };
 
-
   return (
     <div className="auth-container">
       <form className="auth-form" onSubmit={handleSubmit}>
         <h2>Sign up</h2>
 
+        {/* Participant Type Selection */}
+        <div style={{ marginBottom: "1rem" }}>
+          <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "600" }}>
+            I am a:
+          </label>
+          <select
+            value={userType}
+            onChange={(e) => setUserType(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "0.75rem",
+              borderRadius: "8px",
+              border: "1px solid #ccc",
+              fontSize: "1rem",
+            }}
+            required
+          >
+            <option value="iiit-participant">IIIT Student</option>
+            <option value="non-iiit-participant">Non-IIIT Participant</option>
+          </select>
+          <small style={{ color: "#666", display: "block", marginTop: "0.25rem" }}>
+            {userType === "iiit-participant"
+              ? "Use your @iiit.ac.in email address"
+              : "Non-IIIT participants can use any email"}
+          </small>
+        </div>
+
         <input
           type="email"
           placeholder="Email"
+          value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
 
         <input
           type="password"
-          placeholder="Password"
+          placeholder="Password (min 6 characters)"
+          value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          minLength="6"
         />
 
         <button disabled={loading}>

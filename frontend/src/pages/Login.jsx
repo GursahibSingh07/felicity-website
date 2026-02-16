@@ -17,15 +17,13 @@ function Login() {
     }
   }, [user, navigate]);
 
-
-    const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     try {
       const res = await fetch("http://localhost:5000/api/auth/login", {
-        
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -34,7 +32,7 @@ function Login() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
 
-      login(data.token, data.user.role);
+      login(data.token, data.user.role, data.user.userType, data.user.isRoleLocked, data.user.id);
     } 
     
     catch (err) {
@@ -46,7 +44,6 @@ function Login() {
     }
   };
 
-
   return (
     <div className="auth-container">
       <form className="auth-form" onSubmit={handleSubmit}>
@@ -55,6 +52,7 @@ function Login() {
         <input
           type="email"
           placeholder="Email"
+          value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
@@ -62,6 +60,7 @@ function Login() {
         <input
           type="password"
           placeholder="Password"
+          value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
@@ -79,7 +78,5 @@ function Login() {
     </div>
   );
 }
-
-
 
 export default Login;

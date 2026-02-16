@@ -6,13 +6,22 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
-    return token && role ? { token, role } : null;
+    const userType = localStorage.getItem("userType");
+    const isRoleLocked = localStorage.getItem("isRoleLocked") === "true";
+    const userId = localStorage.getItem("userId");
+    
+    return token && role 
+      ? { token, role, userType, isRoleLocked, userId } 
+      : null;
   });
 
-  const login = (token, role) => {
+  const login = (token, role, userType = "participant", isRoleLocked = false, userId = null) => {
     localStorage.setItem("token", token);
     localStorage.setItem("role", role);
-    setUser({ token, role });
+    localStorage.setItem("userType", userType);
+    localStorage.setItem("isRoleLocked", isRoleLocked.toString());
+    localStorage.setItem("userId", userId);
+    setUser({ token, role, userType, isRoleLocked, userId });
   };
 
   const logout = () => {
