@@ -31,6 +31,7 @@ const loginUser = async (req, res) => {
         role: user.role,
         userType: user.userType,
         isRoleLocked: user.isRoleLocked,
+        preferencesComplete: user.preferencesComplete,
       },
     });
   } catch (error) {
@@ -105,6 +106,7 @@ const registerUser = async (req, res) => {
         role: user.role,
         userType: user.userType,
         isRoleLocked: user.isRoleLocked,
+        preferencesComplete: user.preferencesComplete,
       },
     });
   } catch (error) {

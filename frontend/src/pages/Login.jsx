@@ -13,7 +13,11 @@ function Login() {
   
   useEffect(() => {
     if (user) {
-      navigate(`/${user.role}/dashboard`);
+      if (user.role === "participant" && user.preferencesComplete === false) {
+        navigate("/onboarding");
+      } else {
+        navigate(`/${user.role}/dashboard`);
+      }
     }
   }, [user, navigate]);
 
@@ -32,7 +36,15 @@ function Login() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
 
-      login(data.token, data.user.role, data.user.userType, data.user.isRoleLocked, data.user.id);
+      login(
+        data.token,
+        data.user.role,
+        data.user.email,
+        data.user.userType,
+        data.user.isRoleLocked,
+        data.user.id,
+        data.user.preferencesComplete
+      );
     } 
     
     catch (err) {

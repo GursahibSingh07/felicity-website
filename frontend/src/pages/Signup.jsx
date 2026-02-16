@@ -8,13 +8,17 @@ function Signup() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [userType, setUserType] = useState("iiit-participant"); // Default to IIIT
+  const [userType, setUserType] = useState("iiit-participant");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-   if (user) {
-      navigate(`/${user.role}/dashboard`);
+    if (user) {
+      if (user.role === "participant") {
+        navigate("/onboarding");
+      } else {
+        navigate(`/${user.role}/dashboard`);
+      }
     }
   }, [user, navigate]);
 
@@ -23,21 +27,18 @@ function Signup() {
     setLoading(true);
     setError("");
 
-    // Validation
     if (!email || !password) {
       setError("Please fill in all fields");
       setLoading(false);
       return;
     }
 
-    // Email validation for IIIT participants
     if (userType === "iiit-participant" && !email.endsWith("@iiit.ac.in")) {
       setError("IIIT participants must use @iiit.ac.in email address");
       setLoading(false);
       return;
     }
 
-    // Warn if non-IIIT using IIIT domain
     if (userType === "non-iiit-participant" && email.endsWith("@iiit.ac.in")) {
       setError("IIIT email addresses must register as IIIT participant");
       setLoading(false);
@@ -54,7 +55,15 @@ function Signup() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
 
-      login(data.token, data.user.role);
+      login(
+        data.token,
+        data.user.role,
+        data.user.email,
+        data.user.userType,
+        data.user.isRoleLocked,
+        data.user.id,
+        data.user.preferencesComplete || false
+      );
     } 
     
     catch (err) {

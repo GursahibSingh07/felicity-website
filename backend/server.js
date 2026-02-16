@@ -23,6 +23,7 @@ app.use("/api/admin", require("./routes/adminRoutes"));
 
 app.use("/api/events", require("./routes/eventRoutes"));
 app.use("/api/registrations", require("./routes/registrationRoutes"));
+app.use("/api/preferences", require("./routes/preferencesRoutes"));
 
 // route for testing
 app.get('/', (req, res) => {

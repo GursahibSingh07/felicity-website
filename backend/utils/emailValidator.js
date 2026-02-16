@@ -1,20 +1,13 @@
-/**
- * Email validation utilities
- */
-
 const IIIT_EMAIL_DOMAIN = "@iiit.ac.in";
-
 
 const isIIITEmail = (email) => {
   return email.toLowerCase().endsWith(IIIT_EMAIL_DOMAIN);
 };
 
-
 const isValidEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
-
 
 const validatePassword = (password) => {
   if (!password || password.length < 6) {

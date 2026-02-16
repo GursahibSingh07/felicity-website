@@ -9,7 +9,10 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import BrowseEvents from "./pages/BrowseEvents";
 import CreateEvent from "./pages/CreateEvent";
 import EditEvent from "./pages/EditEvent";
-import AdminAnalytics  from "./pages/AdminAnalytics";
+import AdminAnalytics from "./pages/AdminAnalytics";
+import Onboarding from "./pages/Onboarding";
+import Profile from "./pages/Profile";
+import Home from "./pages/Home";
 
 
 
@@ -19,7 +22,7 @@ function App() {
       <Navbar />  
 
       <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/" element={<Home />} />
 
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
@@ -84,6 +87,24 @@ function App() {
             <ProtectedRoute allowedRoles={["admin"]}>
               <AdminAnalytics />
               </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/onboarding"
+          element={
+            <ProtectedRoute allowedRoles={["participant"]}>
+              <Onboarding />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute allowedRoles={["participant", "organizer", "admin"]}>
+              <Profile />
+            </ProtectedRoute>
           }
         />
       </Routes>

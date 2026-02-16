@@ -25,12 +25,17 @@ function Navbar() {
       )}
 
       {user && (
-        <button
-          onClick={logout}
-          style={{ marginLeft: "1rem" }}
-        >
-          Logout
-        </button>
+        <>
+          <Link to="/profile" style={{ marginLeft: "1rem" }}>
+            Profile
+          </Link>
+          <button
+            onClick={handleLogout}
+            style={{ marginLeft: "1rem" }}
+          >
+            Logout
+          </button>
+        </>
       )}
     </nav>
   );

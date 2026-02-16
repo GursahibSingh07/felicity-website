@@ -22,12 +22,25 @@ const userSchema = new mongoose.Schema({
   },
   isRoleLocked: {
     type: Boolean,
-    default: false, // Prevents role switching
+    default: false,
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     default: null, 
+  },
+  areasOfInterest: {
+    type: [String],
+    default: [],
+  },
+  followedOrganizers: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "User",
+    default: [],
+  },
+  preferencesComplete: {
+    type: Boolean,
+    default: false,
   },
 }, { timestamps: true });
 
