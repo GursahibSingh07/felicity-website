@@ -40,6 +40,11 @@ const eventSchema = new mongoose.Schema(
       default: "draft",
     },
 
+    registrationDeadline: {
+      type: Date,
+      required: true,
+    },
+
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

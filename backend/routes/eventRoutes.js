@@ -9,6 +9,8 @@ const {
   getAllEvents,
   registerForEvent,
   getEventAttendees,
+  toggleEventStatus,
+  getEventById,
 } = require("../controllers/eventController");
 
 
@@ -23,6 +25,8 @@ router.post("/", protect, authorize("organizer"), createEvent);
 router.get("/my-events", protect, authorize("organizer"), getMyEvents);
 
 router.put("/:id", protect, authorize("organizer"), updateEvent);
+
+router.get("/:id", protect, authorize("organizer"), getEventById);
 
 router.delete("/:id", protect, authorize("organizer"), deleteEvent);
 
@@ -40,6 +44,14 @@ router.get(
   authorize("organizer"),
   getEventAttendees
 );
+
+router.patch(
+  "/:id/status",
+  protect,
+  authorize("organizer"),
+  toggleEventStatus
+);
+
 
 
 module.exports = router;

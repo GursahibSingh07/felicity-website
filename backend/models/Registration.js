@@ -12,6 +12,15 @@ const registrationSchema = new mongoose.Schema(
       ref: "Event",
       required: true,
     },
+    ticketId: {
+      type: String,
+      unique: true,
+      required: true,
+    },
+    attended: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

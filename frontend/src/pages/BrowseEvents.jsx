@@ -1,25 +1,17 @@
 import { useEffect, useState } from "react";
 
-function ParticipantDashboard() {
+function BrowseEvents() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const fetchMyEvents = async () => {
+    const fetchEvents = async () => {
       try {
-        const token = localStorage.getItem("token");
-
-        const res = await fetch(
-          "http://localhost:5000/api/registrations/my-events",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
+        const res = await fetch("http://localhost:5000/api/events");
         const data = await res.json();
+
         if (!res.ok) throw new Error(data.message);
 
         setEvents(data);
@@ -30,18 +22,17 @@ function ParticipantDashboard() {
       }
     };
 
-    fetchMyEvents();
+    fetchEvents();
   }, []);
 
-  // 👇 MOVE FUNCTION HERE (inside component)
-  const handleUnregister = async (eventId) => {
+  const handleRegister = async (eventId) => {
     try {
       const token = localStorage.getItem("token");
 
       const res = await fetch(
-        `http://localhost:5000/api/registrations/${eventId}`,
+        `http://localhost:5000/api/events/${eventId}/register`,
         {
-          method: "DELETE",
+          method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -51,25 +42,23 @@ function ParticipantDashboard() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
 
-      setEvents((prevEvents) =>
-        prevEvents.filter((event) => event._id !== eventId)
-      );
-
+      setMessage("Registered successfully!");
     } catch (err) {
-      alert(err.message);
+      setMessage(err.message);
     }
   };
 
-  if (loading) return <h2 style={{ padding: "2rem" }}>Loading...</h2>;
+  if (loading) return <h2 style={{ padding: "2rem" }}>Loading events...</h2>;
 
   return (
     <div style={{ padding: "2rem" }}>
-      <h1>My Registered Events</h1>
+      <h1>Browse Events</h1>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
+      {message && <p style={{ color: "green" }}>{message}</p>}
 
       {events.length === 0 ? (
-        <p>You have not registered for any events yet.</p>
+        <p>No events available right now.</p>
       ) : (
         <ul style={{ listStyle: "none", padding: 0 }}>
           {events.map((event) => (
@@ -92,30 +81,9 @@ function ParticipantDashboard() {
                 <strong>Location:</strong> {event.location}
               </p>
 
-              <button
-                style={{
-                  marginTop: "0.5rem",
-                  background: "red",
-                  color: "white",
-                  border: "none",
-                  padding: "0.5rem 1rem",
-                  borderRadius: "5px",
-                  cursor: "pointer",
-                }}
-                onClick={() => handleUnregister(event._id)}
-              >
-                Unregister
+              <button onClick={() => handleRegister(event._id)}>
+                Register
               </button>
-              <p><strong>Ticket ID:</strong> {event.ticketId}</p>
-                <img
-                  src={event.qrCode}
-                  alt="QR Code"
-                  style={{ width: "120px", marginTop: "0.5rem" }}
-                />
-
-                <p>
-                  Status: {event.attended ? "Attended" : "Not Attended"}
-                </p>
             </li>
           ))}
         </ul>
@@ -124,4 +92,4 @@ function ParticipantDashboard() {
   );
 }
 
-export default ParticipantDashboard;
+export default BrowseEvents;
