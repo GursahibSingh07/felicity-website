@@ -6,6 +6,7 @@ const {
   getMyRegisteredEvents,
   unregisterFromEvent,
   markAttendance,
+  validateTicket,
 } = require("../controllers/registrationController");
 
 router.get(
@@ -29,5 +30,11 @@ router.patch(
   markAttendance
 );
 
+router.get(
+  "/validate/:ticketId",
+  protect,
+  authorize("organizer"),
+  validateTicket
+);
 
 module.exports = router;

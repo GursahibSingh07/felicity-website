@@ -252,3 +252,21 @@ exports.markAttendance = async (req, res) => {
   }
 };
 */
+
+exports.getAnalytics = async (req, res) => {
+  try {
+    const totalEvents = await Event.countDocuments();
+    const totalRegistrations = await Registration.countDocuments();
+    const totalUsers = await User.countDocuments();
+
+    res.status(200).json({
+      totalEvents,
+      totalRegistrations,
+      totalUsers,
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+

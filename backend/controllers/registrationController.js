@@ -74,3 +74,24 @@ exports.markAttendance = async (req, res) => {
   }
 };
 
+exports.validateTicket = async (req, res) => {
+  try {
+    const registration = await Registration.findOne({
+      ticketId: req.params.ticketId,
+    }).populate("event user");
+
+    if (!registration)
+      return res.status(404).json({ message: "Invalid ticket" });
+
+    res.status(200).json({
+      valid: true,
+      attended: registration.attended,
+      event: registration.event.title,
+      user: registration.user.email,
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+

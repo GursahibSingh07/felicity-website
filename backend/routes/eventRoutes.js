@@ -13,6 +13,8 @@ const {
   getEventById,
 } = require("../controllers/eventController");
 
+const { getAnalytics } = require("../controllers/eventController");
+
 
 const { protect, authorize } = require("../middleware/authMiddleware");
 
@@ -50,6 +52,13 @@ router.patch(
   protect,
   authorize("organizer"),
   toggleEventStatus
+);
+
+router.get(
+  "/analytics",
+  protect,
+  authorize("admin"),
+  getAnalytics
 );
 
 

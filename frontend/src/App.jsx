@@ -9,6 +9,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import BrowseEvents from "./pages/BrowseEvents";
 import CreateEvent from "./pages/CreateEvent";
 import EditEvent from "./pages/EditEvent";
+import AdminAnalytics  from "./pages/AdminAnalytics";
 
 
 
@@ -77,7 +78,14 @@ function App() {
           }
         />
 
-
+        <Route
+          path="/admin/analytics"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminAnalytics />
+              </ProtectedRoute>
+          }
+        />
       </Routes>
     </>
   );
