@@ -64,11 +64,23 @@ const provisionFirstAdmin = async (req, res) => {
 
 const createOrganizer = async (req, res) => {
   try {
-    const { email, password, organizationName } = req.body;
+    const { email, password, organizerName, category, description } = req.body;
 
-    if (!email || !password || !organizationName) {
+    if (!email || !password || !organizerName) {
       return res.status(400).json({
-        message: "Email, password, and organizationName are required",
+        message: "Email, password, and organizer name are required",
+      });
+    }
+
+    if (!category) {
+      return res.status(400).json({
+        message: "Category is required",
+      });
+    }
+
+    if (!description) {
+      return res.status(400).json({
+        message: "Description is required",
       });
     }
 
@@ -97,7 +109,10 @@ const createOrganizer = async (req, res) => {
       role: "organizer",
       userType: "organizer",
       isRoleLocked: true, 
-      createdBy: req.user.id, 
+      createdBy: req.user.id,
+      organizerName,
+      category,
+      description,
     });
 
     res.status(201).json({
@@ -107,7 +122,9 @@ const createOrganizer = async (req, res) => {
         email: organizer.email,
         role: organizer.role,
         userType: organizer.userType,
-        organizationName,
+        organizerName: organizer.organizerName,
+        category: organizer.category,
+        description: organizer.description,
         createdAt: organizer.createdAt,
       },
     });

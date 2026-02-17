@@ -12,6 +12,8 @@ function Profile() {
   });
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [selectedOrganizers, setSelectedOrganizers] = useState([]);
+  const [profileData, setProfileData] = useState(null);
+  const [editedProfile, setEditedProfile] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -21,40 +23,49 @@ function Profile() {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (user?.role !== "participant") {
-        setLoading(false);
-        return;
-      }
-
       try {
-        const [interestsRes, organizersRes, prefsRes] = await Promise.all([
-          fetch("http://localhost:5000/api/preferences/interests", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch("http://localhost:5000/api/preferences/organizers", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch("http://localhost:5000/api/preferences", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
+        const profileRes = await fetch("http://localhost:5000/api/auth/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-        if (!interestsRes.ok || !organizersRes.ok || !prefsRes.ok) {
-          throw new Error("Failed to fetch data");
+        if (!profileRes.ok) {
+          throw new Error("Failed to fetch profile");
         }
 
-        const interestsData = await interestsRes.json();
-        const organizersData = await organizersRes.json();
-        const prefsData = await prefsRes.json();
+        const profileData = await profileRes.json();
+        setProfileData(profileData);
+        setEditedProfile(profileData);
 
-        setInterests(interestsData.interests || []);
-        setOrganizers(organizersData.organizers || []);
-        setPreferences(prefsData);
-        setSelectedInterests(prefsData.areasOfInterest || []);
-        const orgIds = (prefsData.followedOrganizers || []).map((org) => {
-          return typeof org === "string" ? org : org._id;
-        });
-        setSelectedOrganizers(orgIds);
+        if (user?.role === "participant") {
+          const [interestsRes, organizersRes, prefsRes] = await Promise.all([
+            fetch("http://localhost:5000/api/preferences/interests", {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+            fetch("http://localhost:5000/api/preferences/organizers", {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+            fetch("http://localhost:5000/api/preferences", {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+          ]);
+
+          if (!interestsRes.ok || !organizersRes.ok || !prefsRes.ok) {
+            throw new Error("Failed to fetch preferences data");
+          }
+
+          const interestsData = await interestsRes.json();
+          const organizersData = await organizersRes.json();
+          const prefsData = await prefsRes.json();
+
+          setInterests(interestsData.interests || []);
+          setOrganizers(organizersData.organizers || []);
+          setPreferences(prefsData);
+          setSelectedInterests(prefsData.areasOfInterest || []);
+          const orgIds = (prefsData.followedOrganizers || []).map((org) => {
+            return typeof org === "string" ? org : org._id;
+          });
+          setSelectedOrganizers(orgIds);
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -122,6 +133,51 @@ function Profile() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleSaveProfile = async () => {
+    setSaving(true);
+    setError("");
+    setSuccess("");
+
+    if (profileData?.role === "participant" && editedProfile.contactNumber) {
+      if (!/^\d{10}$/.test(editedProfile.contactNumber)) {
+        setError("Contact number must be exactly 10 digits");
+        setSaving(false);
+        return;
+      }
+    }
+
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(editedProfile),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || "Failed to update profile");
+      }
+
+      const data = await res.json();
+      setProfileData(data.user);
+      setEditedProfile(data.user);
+      setSuccess("Profile updated successfully!");
+
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleProfileChange = (field, value) => {
+    setEditedProfile((prev) => ({ ...prev, [field]: value }));
   };
 
   if (!user) {
@@ -246,22 +302,120 @@ function Profile() {
 
         {activeTab === "account" && (
           <div style={styles.tabContent}>
+            {error && <div style={styles.error}>{error}</div>}
+            {success && <div style={styles.success}>{success}</div>}
+
             <div style={styles.section}>
               <h3>Account Information</h3>
+              
               <div style={styles.infoRow}>
                 <label>Email:</label>
-                <span>{user?.email}</span>
+                <span>{profileData?.email}</span>
               </div>
+              
               <div style={styles.infoRow}>
                 <label>Role:</label>
                 <span style={{ textTransform: "capitalize" }}>
-                  {user?.role}
+                  {profileData?.role}
                 </span>
               </div>
+
+              {profileData?.role === "participant" && (
+                <>
+                  <div style={styles.editRow}>
+                    <label>First Name:</label>
+                    <input
+                      type="text"
+                      value={editedProfile.firstName || ""}
+                      onChange={(e) => handleProfileChange("firstName", e.target.value)}
+                      style={styles.input}
+                    />
+                  </div>
+
+                  <div style={styles.editRow}>
+                    <label>Last Name:</label>
+                    <input
+                      type="text"
+                      value={editedProfile.lastName || ""}
+                      onChange={(e) => handleProfileChange("lastName", e.target.value)}
+                      style={styles.input}
+                    />
+                  </div>
+
+                  <div style={styles.editRow}>
+                    <label>College / Org Name:</label>
+                    <input
+                      type="text"
+                      value={editedProfile.collegeOrgName || ""}
+                      onChange={(e) => handleProfileChange("collegeOrgName", e.target.value)}
+                      style={styles.input}
+                    />
+                  </div>
+
+                  <div style={styles.editRow}>
+                    <label>Contact Number:</label>
+                    <input
+                      type="tel"
+                      value={editedProfile.contactNumber || ""}
+                      onChange={(e) => handleProfileChange("contactNumber", e.target.value)}
+                      style={styles.input}
+                      pattern="\d{10}"
+                      maxLength="10"
+                      placeholder="10 digits"
+                    />
+                  </div>
+                </>
+              )}
+
+              {profileData?.role === "organizer" && (
+                <>
+                  <div style={styles.editRow}>
+                    <label>Organizer Name:</label>
+                    <input
+                      type="text"
+                      value={editedProfile.organizerName || ""}
+                      onChange={(e) => handleProfileChange("organizerName", e.target.value)}
+                      style={styles.input}
+                    />
+                  </div>
+
+                  <div style={styles.editRow}>
+                    <label>Category:</label>
+                    <input
+                      type="text"
+                      value={editedProfile.category || ""}
+                      onChange={(e) => handleProfileChange("category", e.target.value)}
+                      style={styles.input}
+                    />
+                  </div>
+
+                  <div style={styles.editRow}>
+                    <label>Description:</label>
+                    <textarea
+                      value={editedProfile.description || ""}
+                      onChange={(e) => handleProfileChange("description", e.target.value)}
+                      style={{...styles.input, minHeight: "80px", resize: "vertical"}}
+                    />
+                  </div>
+                </>
+              )}
             </div>
 
+            {profileData?.role !== "admin" && (
+              <button
+                onClick={handleSaveProfile}
+                disabled={saving}
+                style={{
+                  ...styles.saveButton,
+                  ...(saving ? styles.buttonDisabled : {}),
+                }}
+              >
+                {saving ? "Saving..." : "Save Changes"}
+              </button>
+            )}
+
             <div style={styles.note}>
-              To change your password or other account settings, please contact support.
+              To change your email or password, please contact support.
             </div>
           </div>
         )}
@@ -398,6 +552,19 @@ const styles = {
     marginBottom: "1rem",
     paddingBottom: "0.75rem",
     borderBottom: "1px solid #eee",
+  },
+  editRow: {
+    display: "flex",
+    flexDirection: "column",
+    marginBottom: "1.25rem",
+  },
+  input: {
+    padding: "0.75rem",
+    border: "1px solid #ddd",
+    borderRadius: "8px",
+    fontSize: "0.95rem",
+    marginTop: "0.5rem",
+    fontFamily: "inherit",
   },
   saveButton: {
     width: "100%",

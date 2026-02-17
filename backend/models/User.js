@@ -42,6 +42,34 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  firstName: {
+    type: String,
+    default: "",
+  },
+  lastName: {
+    type: String,
+    default: "",
+  },
+  collegeOrgName: {
+    type: String,
+    default: "",
+  },
+  contactNumber: {
+    type: String,
+    default: "",
+  },
+  organizerName: {
+    type: String,
+    default: "",
+  },
+  category: {
+    type: String,
+    default: "",
+  },
+  description: {
+    type: String,
+    default: "",
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);

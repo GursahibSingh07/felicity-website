@@ -129,8 +129,32 @@ function OrganizerDashboard() {
             >
               <h3>{event.title}</h3>
 
+              <p>Type: {event.eventType === "normal" 
+                  ? "Normal Event" 
+                  : "Merchandise Event"}</p>
               <p>Status: {event.status}</p>
               <p>Capacity: {event.capacity}</p>
+              <p>Fee: ₹{event.registrationFee || 0}</p>
+              <p>
+                Start: {new Date(event.date).toLocaleDateString()}
+                {event.endDate && ` - End: ${new Date(event.endDate).toLocaleDateString()}`}
+              </p>
+              {event.tags && event.tags.length > 0 && (
+                <p>
+                  Tags: {event.tags.map(tag => (
+                    <span key={tag} style={{ 
+                      display: "inline-block", 
+                      background: "#e0e0e0", 
+                      padding: "0.2rem 0.4rem", 
+                      borderRadius: "3px", 
+                      marginRight: "0.3rem",
+                      fontSize: "0.8rem"
+                    }}>
+                      {tag}
+                    </span>
+                  ))}
+                </p>
+              )}
 
               <p>
                 Registrations:{" "}

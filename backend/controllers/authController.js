@@ -32,6 +32,13 @@ const loginUser = async (req, res) => {
         userType: user.userType,
         isRoleLocked: user.isRoleLocked,
         preferencesComplete: user.preferencesComplete,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        collegeOrgName: user.collegeOrgName,
+        contactNumber: user.contactNumber,
+        organizerName: user.organizerName,
+        category: user.category,
+        description: user.description,
       },
     });
   } catch (error) {
@@ -42,12 +49,43 @@ const loginUser = async (req, res) => {
 
 const registerUser = async (req, res) => {
   try {
-    const { email, password, userType } = req.body;
+    const { 
+      email, 
+      password, 
+      userType,
+      firstName,
+      lastName,
+      collegeOrgName,
+      contactNumber
+    } = req.body;
 
     if (!email || !password || !userType) {
       return res.status(400).json({
         message: "Email, password, and userType are required",
       });
+    }
+
+    if (["iiit-participant", "non-iiit-participant"].includes(userType)) {
+      if (!firstName || !lastName) {
+        return res.status(400).json({
+          message: "First name and last name are required for participants",
+        });
+      }
+      if (!collegeOrgName) {
+        return res.status(400).json({
+          message: "College/Organization name is required for participants",
+        });
+      }
+      if (!contactNumber) {
+        return res.status(400).json({
+          message: "Contact number is required for participants",
+        });
+      }
+      if (!/^\d{10}$/.test(contactNumber)) {
+        return res.status(400).json({
+          message: "Contact number must be exactly 10 digits",
+        });
+      }
     }
 
     if (!isValidEmail(email)) {
@@ -94,7 +132,11 @@ const registerUser = async (req, res) => {
       password: hashedPassword,
       role: "participant",
       userType,
-      isRoleLocked: true, 
+      isRoleLocked: true,
+      firstName: firstName || "",
+      lastName: lastName || "",
+      collegeOrgName: collegeOrgName || "",
+      contactNumber: contactNumber || "",
     });
 
     res.status(201).json({
@@ -107,6 +149,13 @@ const registerUser = async (req, res) => {
         userType: user.userType,
         isRoleLocked: user.isRoleLocked,
         preferencesComplete: user.preferencesComplete,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        collegeOrgName: user.collegeOrgName,
+        contactNumber: user.contactNumber,
+        organizerName: user.organizerName,
+        category: user.category,
+        description: user.description,
       },
     });
   } catch (error) {
@@ -137,9 +186,97 @@ const verifyToken = async (req, res) => {
   }
 };
 
+const getUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      id: user._id,
+      email: user.email,
+      role: user.role,
+      userType: user.userType,
+      isRoleLocked: user.isRoleLocked,
+      preferencesComplete: user.preferencesComplete,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      collegeOrgName: user.collegeOrgName,
+      contactNumber: user.contactNumber,
+      organizerName: user.organizerName,
+      category: user.category,
+      description: user.description,
+      createdAt: user.createdAt,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const updateUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const {
+      firstName,
+      lastName,
+      collegeOrgName,
+      contactNumber,
+      organizerName,
+      category,
+      description,
+    } = req.body;
+
+    if (user.role === "participant") {
+      if (firstName !== undefined) user.firstName = firstName;
+      if (lastName !== undefined) user.lastName = lastName;
+      if (collegeOrgName !== undefined) user.collegeOrgName = collegeOrgName;
+      if (contactNumber !== undefined) {
+        if (!/^\d{10}$/.test(contactNumber)) {
+          return res.status(400).json({
+            message: "Contact number must be exactly 10 digits",
+          });
+        }
+        user.contactNumber = contactNumber;
+      }
+    } else if (user.role === "organizer") {
+      if (organizerName !== undefined) user.organizerName = organizerName;
+      if (category !== undefined) user.category = category;
+      if (description !== undefined) user.description = description;
+    }
+
+    await user.save();
+
+    res.json({
+      message: "Profile updated successfully",
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        userType: user.userType,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        collegeOrgName: user.collegeOrgName,
+        contactNumber: user.contactNumber,
+        organizerName: user.organizerName,
+        category: user.category,
+        description: user.description,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   loginUser,
   registerUser,
   verifyToken,
+  getUserProfile,
+  updateUserProfile,
 };
 

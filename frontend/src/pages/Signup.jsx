@@ -9,6 +9,10 @@ function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [userType, setUserType] = useState("iiit-participant");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [collegeOrgName, setCollegeOrgName] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -33,6 +37,18 @@ function Signup() {
       return;
     }
 
+    if (!firstName || !lastName || !collegeOrgName || !contactNumber) {
+      setError("Please fill in all required fields");
+      setLoading(false);
+      return;
+    }
+
+    if (!/^\d{10}$/.test(contactNumber)) {
+      setError("Contact number must be exactly 10 digits");
+      setLoading(false);
+      return;
+    }
+
     if (userType === "iiit-participant" && !email.endsWith("@iiit.ac.in")) {
       setError("IIIT participants must use @iiit.ac.in email address");
       setLoading(false);
@@ -49,7 +65,15 @@ function Signup() {
       const res = await fetch("http://localhost:5000/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, userType }),
+        body: JSON.stringify({ 
+          email, 
+          password, 
+          userType,
+          firstName,
+          lastName,
+          collegeOrgName,
+          contactNumber
+        }),
       });
 
       const data = await res.json();
@@ -106,6 +130,40 @@ function Signup() {
               : "Non-IIIT participants can use any email"}
           </small>
         </div>
+
+        <input
+          type="text"
+          placeholder="First Name"
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
+          required
+        />
+
+        <input
+          type="text"
+          placeholder="Last Name"
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+          required
+        />
+
+        <input
+          type="text"
+          placeholder="College / Organization Name"
+          value={collegeOrgName}
+          onChange={(e) => setCollegeOrgName(e.target.value)}
+          required
+        />
+
+        <input
+          type="tel"
+          placeholder="Contact Number (10 digits)"
+          value={contactNumber}
+          onChange={(e) => setContactNumber(e.target.value)}
+          required
+          pattern="\d{10}"
+          maxLength="10"
+        />
 
         <input
           type="email"

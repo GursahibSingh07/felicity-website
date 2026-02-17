@@ -21,6 +21,11 @@ const registrationSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    customFormResponses: {
+      type: Map,
+      of: mongoose.Schema.Types.Mixed,
+      default: {},
+    },
   },
   { timestamps: true }
 );

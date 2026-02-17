@@ -85,12 +85,46 @@ function ParticipantDashboard() {
               <h3>{event.title}</h3>
               <p>{event.description}</p>
               <p>
-                <strong>Date:</strong>{" "}
+                <strong>Type:</strong>{" "}
+                {event.eventType === "normal" 
+                  ? "Normal Event" 
+                  : "Merchandise Event"}
+              </p>
+              <p>
+                <strong>Start Date:</strong>{" "}
                 {new Date(event.date).toLocaleDateString()}
               </p>
+              {event.endDate && (
+                <p>
+                  <strong>End Date:</strong>{" "}
+                  {new Date(event.endDate).toLocaleDateString()}
+                </p>
+              )}
               <p>
                 <strong>Location:</strong> {event.location}
               </p>
+              {event.registrationFee > 0 && (
+                <p>
+                  <strong>Fee Paid:</strong> ₹{event.registrationFee}
+                </p>
+              )}
+              {event.tags && event.tags.length > 0 && (
+                <p>
+                  <strong>Tags:</strong>{" "}
+                  {event.tags.map(tag => (
+                    <span key={tag} style={{ 
+                      display: "inline-block", 
+                      background: "#e0e0e0", 
+                      padding: "0.2rem 0.4rem", 
+                      borderRadius: "3px", 
+                      marginRight: "0.3rem",
+                      fontSize: "0.85rem"
+                    }}>
+                      {tag}
+                    </span>
+                  ))}
+                </p>
+              )}
 
               <button
                 style={{

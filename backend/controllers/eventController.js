@@ -99,7 +99,19 @@ exports.getAllEvents = async (req, res) => {
       "email"
     );
 
-    res.status(200).json(events);
+    // Ensure eventType exists for all events (backwards compatibility)
+    const eventsData = events.map(event => {
+      const eventObj = event.toObject();
+      if (!eventObj.eventType) {
+        eventObj.eventType = "normal";
+      }
+      if (!eventObj.customForm) {
+        eventObj.customForm = [];
+      }
+      return eventObj;
+    });
+
+    res.status(200).json(eventsData);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -130,6 +142,21 @@ exports.registerForEvent = async (req, res) => {
     if (currentCount >= event.capacity)
       return res.status(400).json({ message: "Event is full" });
 
+    // Validate custom form fields if event is normal type
+    let customFormResponses = {};
+    if (event.eventType === "normal" && event.customForm && event.customForm.length > 0) {
+      customFormResponses = req.body.customFormResponses || {};
+      
+      // Check required fields
+      for (const field of event.customForm) {
+        if (field.required && !customFormResponses[field.fieldName]) {
+          return res.status(400).json({ 
+            message: `${field.fieldLabel} is required` 
+          });
+        }
+      }
+    }
+
     // Create registration
     const crypto = require("crypto");
     const QRCode = require("qrcode");
@@ -142,6 +169,7 @@ exports.registerForEvent = async (req, res) => {
       user: req.user.id,
       event: event._id,
       ticketId,
+      customFormResponses,
     });
 
 
@@ -224,7 +252,16 @@ exports.getEventById = async (req, res) => {
     if (event.createdBy.toString() !== req.user.id)
       return res.status(403).json({ message: "Not authorized" });
 
-    res.status(200).json(event);
+    // Ensure eventType exists (for backwards compatibility with old events)
+    const eventData = event.toObject();
+    if (!eventData.eventType) {
+      eventData.eventType = "normal";
+    }
+    if (!eventData.customForm) {
+      eventData.customForm = [];
+    }
+
+    res.status(200).json(eventData);
 
   } catch (error) {
     res.status(500).json({ message: error.message });
