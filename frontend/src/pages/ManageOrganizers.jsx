@@ -21,7 +21,7 @@ function ManageOrganizers() {
 
   const fetchOrganizers = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/admin/organizers", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/organizers`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -38,7 +38,7 @@ function ManageOrganizers() {
 
   const fetchResetRequests = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/admin/reset-requests", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/reset-requests`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -50,7 +50,7 @@ function ManageOrganizers() {
 
   const handleApproveReset = async (requestId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/reset-requests/${requestId}/approve`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/reset-requests/${requestId}/approve`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ comment: "" }),
@@ -70,7 +70,7 @@ function ManageOrganizers() {
     const comment = prompt("Enter rejection reason:");
     if (comment === null) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/reset-requests/${requestId}/reject`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/reset-requests/${requestId}/reject`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ comment }),
@@ -94,7 +94,7 @@ function ManageOrganizers() {
       const payload = { organizerName: formData.organizerName, category: formData.category, description: formData.description };
       if (formData.email) payload.email = formData.email;
       if (formData.password) payload.password = formData.password;
-      const res = await fetch("http://localhost:5000/api/admin/create-organizer", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/create-organizer`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),
@@ -112,7 +112,7 @@ function ManageOrganizers() {
 
   const handleToggle = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/organizers/${id}/toggle`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/organizers/${id}/toggle`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -127,7 +127,7 @@ function ManageOrganizers() {
   const handleDelete = async (id) => {
     if (!window.confirm("Permanently delete this organizer and all their data? This cannot be undone.")) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/organizers/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/organizers/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -145,7 +145,7 @@ function ManageOrganizers() {
     const newPassword = prompt("Enter new password for this organizer (min 8 chars, upper, lower, number, special):");
     if (!newPassword) return;
     try {
-      const res = await fetch("http://localhost:5000/api/admin/reset-organizer-password", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/reset-organizer-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ organizerId: id, newPassword }),

@@ -19,7 +19,7 @@ function ParticipantDashboard() {
         const token = localStorage.getItem("token");
 
         const res = await fetch(
-          "http://localhost:5000/api/registrations/my-events",
+          `${import.meta.env.VITE_API_URL}/api/registrations/my-events`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -46,7 +46,7 @@ function ParticipantDashboard() {
       const token = localStorage.getItem("token");
 
       const res = await fetch(
-        `http://localhost:5000/api/registrations/${eventId}`,
+        `${import.meta.env.VITE_API_URL}/api/registrations/${eventId}`,
         {
           method: "DELETE",
           headers: {
@@ -74,7 +74,7 @@ function ParticipantDashboard() {
     setFeedbackMessage("");
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5000/api/feedback/${event._id}/mine`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/feedback/${event._id}/mine`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -96,7 +96,7 @@ function ParticipantDashboard() {
     setFeedbackSubmitting(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5000/api/feedback/${feedbackModal._id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/feedback/${feedbackModal._id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ rating: feedbackRating, comment: feedbackComment }),

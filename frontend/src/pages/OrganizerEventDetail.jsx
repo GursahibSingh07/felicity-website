@@ -26,7 +26,7 @@ function OrganizerEventDetail() {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/events/${id}`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/events/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -45,7 +45,7 @@ function OrganizerEventDetail() {
 
   const handleMarkAttended = async (ticketId, attendeeRegId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/registrations/attend/${ticketId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/registrations/attend/${ticketId}`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -62,7 +62,7 @@ function OrganizerEventDetail() {
   const fetchPendingPayments = async () => {
     setPaymentLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/registrations/payments/pending/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/registrations/payments/pending/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -77,7 +77,7 @@ function OrganizerEventDetail() {
 
   const handleApprovePayment = async (registrationId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/registrations/payments/approve/${registrationId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/registrations/payments/approve/${registrationId}`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -91,7 +91,7 @@ function OrganizerEventDetail() {
 
   const handleRejectPayment = async (registrationId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/registrations/payments/reject/${registrationId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/registrations/payments/reject/${registrationId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -113,8 +113,8 @@ function OrganizerEventDetail() {
     setFeedbackLoading(true);
     try {
       const url = ratingFilter
-        ? `http://localhost:5000/api/feedback/${id}?rating=${ratingFilter}`
-        : `http://localhost:5000/api/feedback/${id}`;
+        ? `${import.meta.env.VITE_API_URL}/api/feedback/${id}?rating=${ratingFilter}`
+        : `${import.meta.env.VITE_API_URL}/api/feedback/${id}`;
       const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);

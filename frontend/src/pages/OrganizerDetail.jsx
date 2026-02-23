@@ -12,7 +12,7 @@ function OrganizerDetail() {
   useEffect(() => {
     const fetchOrganizerDetails = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/organizer/${id}`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/organizer/${id}`);
         const responseData = await res.json();
 
         if (!res.ok) throw new Error(responseData.message);

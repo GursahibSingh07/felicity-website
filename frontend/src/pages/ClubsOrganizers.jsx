@@ -15,7 +15,7 @@ function ClubsOrganizers() {
 
   const fetchOrganizers = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/organizer");
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/organizer`);
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.message);
@@ -31,7 +31,7 @@ function ClubsOrganizers() {
   const fetchFollowedOrganizers = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5000/api/organizer/followed", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/organizer/followed`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -50,7 +50,7 @@ function ClubsOrganizers() {
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(
-        `http://localhost:5000/api/organizer/${organizerId}/follow`,
+        `${import.meta.env.VITE_API_URL}/api/organizer/${organizerId}/follow`,
         {
           method: "POST",
           headers: {
@@ -74,7 +74,7 @@ function ClubsOrganizers() {
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(
-        `http://localhost:5000/api/organizer/${organizerId}/follow`,
+        `${import.meta.env.VITE_API_URL}/api/organizer/${organizerId}/follow`,
         {
           method: "DELETE",
           headers: {

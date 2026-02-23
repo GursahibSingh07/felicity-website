@@ -20,10 +20,10 @@ function Onboarding() {
     const fetchData = async () => {
       try {
         const [interestsRes, organizersRes] = await Promise.all([
-          fetch("http://localhost:5000/api/preferences/interests", {
+          fetch(`${import.meta.env.VITE_API_URL}/api/preferences/interests`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          fetch("http://localhost:5000/api/preferences/organizers", {
+          fetch(`${import.meta.env.VITE_API_URL}/api/preferences/organizers`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -76,7 +76,7 @@ function Onboarding() {
 
     try {
       const res = await fetch(
-        "http://localhost:5000/api/preferences/update",
+        `${import.meta.env.VITE_API_URL}/api/preferences/update`,
         {
           method: "POST",
           headers: {
@@ -112,7 +112,7 @@ function Onboarding() {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:5000/api/preferences/skip", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/preferences/skip`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

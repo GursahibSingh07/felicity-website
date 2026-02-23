@@ -1,4 +1,4 @@
-# Section 16: Anonymous Feedback System - Validation
+g# Section 16: Anonymous Feedback System - Validation
 
 ## Files Created
 - `backend/models/Feedback.js` — Schema with event, user, rating (1-5), comment (max 1000 chars); unique compound index on event+user

@@ -33,7 +33,7 @@ function Profile() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const profileRes = await fetch("http://localhost:5000/api/auth/profile", {
+        const profileRes = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -47,13 +47,13 @@ function Profile() {
 
         if (user?.role === "participant") {
           const [interestsRes, organizersRes, prefsRes] = await Promise.all([
-            fetch("http://localhost:5000/api/preferences/interests", {
+            fetch(`${import.meta.env.VITE_API_URL}/api/preferences/interests`, {
               headers: { Authorization: `Bearer ${token}` },
             }),
-            fetch("http://localhost:5000/api/preferences/organizers", {
+            fetch(`${import.meta.env.VITE_API_URL}/api/preferences/organizers`, {
               headers: { Authorization: `Bearer ${token}` },
             }),
-            fetch("http://localhost:5000/api/preferences", {
+            fetch(`${import.meta.env.VITE_API_URL}/api/preferences`, {
               headers: { Authorization: `Bearer ${token}` },
             }),
           ]);
@@ -94,7 +94,7 @@ function Profile() {
   const fetchResetRequests = async () => {
     setResetLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/admin/my-reset-requests", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/my-reset-requests`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -115,7 +115,7 @@ function Profile() {
     setError("");
     setSuccess("");
     try {
-      const res = await fetch("http://localhost:5000/api/admin/reset-request", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/reset-request`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ reason: resetReason }),
@@ -161,7 +161,7 @@ function Profile() {
 
     try {
       const res = await fetch(
-        "http://localhost:5000/api/preferences/update",
+        `${import.meta.env.VITE_API_URL}/api/preferences/update`,
         {
           method: "POST",
           headers: {
@@ -206,7 +206,7 @@ function Profile() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/profile", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/profile`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -259,7 +259,7 @@ function Profile() {
     setSaving(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/change-password", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/change-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

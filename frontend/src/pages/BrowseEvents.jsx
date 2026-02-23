@@ -21,7 +21,7 @@ function BrowseEvents() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/events");
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/events`);
         const data = await res.json();
 
         if (!res.ok) throw new Error(data.message);
@@ -105,7 +105,7 @@ function BrowseEvents() {
       const token = localStorage.getItem("token");
 
       const res = await fetch(
-        `http://localhost:5000/api/events/${selectedEvent._id}/register`,
+        `${import.meta.env.VITE_API_URL}/api/events/${selectedEvent._id}/register`,
         {
           method: "POST",
           headers: {

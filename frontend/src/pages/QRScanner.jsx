@@ -30,7 +30,7 @@ function QRScanner() {
   const fetchDashboard = async () => {
     setDashLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/registrations/attendance/${eventId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/registrations/attendance/${eventId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -83,7 +83,7 @@ function QRScanner() {
     setScanResult(null);
     setScanError("");
     try {
-      const res = await fetch(`http://localhost:5000/api/registrations/scan/${ticketId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/registrations/scan/${ticketId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -117,7 +117,7 @@ function QRScanner() {
       return;
     }
     try {
-      const res = await fetch(`http://localhost:5000/api/registrations/manual-override/${overrideModal}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/registrations/manual-override/${overrideModal}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -137,7 +137,7 @@ function QRScanner() {
 
   const handleExportCSV = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/registrations/attendance/${eventId}/export`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/registrations/attendance/${eventId}/export`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Export failed");

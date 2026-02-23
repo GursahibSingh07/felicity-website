@@ -28,7 +28,7 @@ function EventDetails() {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/events/public/${id}`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/events/public/${id}`);
         const data = await res.json();
 
         if (!res.ok) throw new Error(data.message);
@@ -72,7 +72,7 @@ function EventDetails() {
       }
 
       const res = await fetch(
-        `http://localhost:5000/api/events/${id}/register`,
+        `${import.meta.env.VITE_API_URL}/api/events/${id}/register`,
         {
           method: "POST",
           headers: {
@@ -98,7 +98,7 @@ function EventDetails() {
   const fetchMessages = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5000/api/discussions/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/discussions/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) {
@@ -118,7 +118,7 @@ function EventDetails() {
     try {
       const token = localStorage.getItem("token");
       const lastVisit = localStorage.getItem(`discussion_last_visit_${id}`) || new Date(0).toISOString();
-      const res = await fetch(`http://localhost:5000/api/discussions/${id}/unread?since=${lastVisit}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/discussions/${id}/unread?since=${lastVisit}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -152,7 +152,7 @@ function EventDetails() {
       if (replyTo) body.parentMessage = replyTo;
       if (isAnnouncement) body.isAnnouncement = true;
 
-      const res = await fetch(`http://localhost:5000/api/discussions/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/discussions/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(body),
@@ -174,7 +174,7 @@ function EventDetails() {
   const handleDeleteMessage = async (messageId) => {
     try {
       const token = localStorage.getItem("token");
-      await fetch(`http://localhost:5000/api/discussions/message/${messageId}/delete`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/discussions/message/${messageId}/delete`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -185,7 +185,7 @@ function EventDetails() {
   const handlePinMessage = async (messageId) => {
     try {
       const token = localStorage.getItem("token");
-      await fetch(`http://localhost:5000/api/discussions/message/${messageId}/pin`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/discussions/message/${messageId}/pin`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -196,7 +196,7 @@ function EventDetails() {
   const handleReact = async (messageId, emoji) => {
     try {
       const token = localStorage.getItem("token");
-      await fetch(`http://localhost:5000/api/discussions/message/${messageId}/react`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/discussions/message/${messageId}/react`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ emoji }),

@@ -12,7 +12,7 @@ function OngoingEvents() {
   useEffect(() => {
     const fetchOngoing = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/events/my-events", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/events/my-events`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -29,7 +29,7 @@ function OngoingEvents() {
 
   const handleStatusChange = async (eventId, newStatus) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/events/${eventId}/status`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/events/${eventId}/status`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ newStatus }),

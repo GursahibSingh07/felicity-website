@@ -42,7 +42,7 @@ function OrganizerDashboard() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/events/my-events", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/events/my-events`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -59,7 +59,7 @@ function OrganizerDashboard() {
 
   const handleStatusChange = async (eventId, newStatus) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/events/${eventId}/status`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/events/${eventId}/status`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ newStatus }),
@@ -75,7 +75,7 @@ function OrganizerDashboard() {
   const handleDelete = async (eventId) => {
     if (!window.confirm("Delete this event and all its registrations?")) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/events/${eventId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/events/${eventId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -90,7 +90,7 @@ function OrganizerDashboard() {
   const handleCancel = async (eventId) => {
     if (!window.confirm("Cancel this event? This cannot be undone.")) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/events/${eventId}/cancel`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/events/${eventId}/cancel`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
       });
