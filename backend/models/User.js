@@ -70,6 +70,18 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+  discordWebhook: {
+    type: String,
+    default: "",
+  },
+  contactEmail: {
+    type: String,
+    default: "",
+  },
+  isDisabled: {
+    type: Boolean,
+    default: false,
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);

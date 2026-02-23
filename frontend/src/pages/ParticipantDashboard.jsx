@@ -4,6 +4,14 @@ function ParticipantDashboard() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState("upcoming");
+  const [feedbackModal, setFeedbackModal] = useState(null);
+  const [feedbackRating, setFeedbackRating] = useState(0);
+  const [feedbackHover, setFeedbackHover] = useState(0);
+  const [feedbackComment, setFeedbackComment] = useState("");
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState("");
+  const [existingFeedbacks, setExistingFeedbacks] = useState({});
 
   useEffect(() => {
     const fetchMyEvents = async () => {
@@ -33,7 +41,6 @@ function ParticipantDashboard() {
     fetchMyEvents();
   }, []);
 
-  // 👇 MOVE FUNCTION HERE (inside component)
   const handleUnregister = async (eventId) => {
     try {
       const token = localStorage.getItem("token");
@@ -60,99 +67,408 @@ function ParticipantDashboard() {
     }
   };
 
+  const openFeedbackModal = async (event) => {
+    setFeedbackModal(event);
+    setFeedbackRating(0);
+    setFeedbackComment("");
+    setFeedbackMessage("");
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://localhost:5000/api/feedback/${event._id}/mine`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data) {
+          setFeedbackRating(data.rating);
+          setFeedbackComment(data.comment || "");
+          setExistingFeedbacks(prev => ({ ...prev, [event._id]: data }));
+        }
+      }
+    } catch {}
+  };
+
+  const handleSubmitFeedback = async () => {
+    if (feedbackRating === 0) {
+      setFeedbackMessage("Please select a rating");
+      return;
+    }
+    setFeedbackSubmitting(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://localhost:5000/api/feedback/${feedbackModal._id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ rating: feedbackRating, comment: feedbackComment }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      setFeedbackMessage(data.message);
+      setExistingFeedbacks(prev => ({ ...prev, [feedbackModal._id]: { rating: feedbackRating, comment: feedbackComment } }));
+      setTimeout(() => setFeedbackModal(null), 1500);
+    } catch (err) {
+      setFeedbackMessage(err.message);
+    } finally {
+      setFeedbackSubmitting(false);
+    }
+  };
+
+  const renderStars = (rating, hover, interactive = false) => {
+    return [1, 2, 3, 4, 5].map(star => (
+      <span
+        key={star}
+        onClick={interactive ? () => setFeedbackRating(star) : undefined}
+        onMouseEnter={interactive ? () => setFeedbackHover(star) : undefined}
+        onMouseLeave={interactive ? () => setFeedbackHover(0) : undefined}
+        style={{
+          fontSize: interactive ? "2rem" : "1rem",
+          cursor: interactive ? "pointer" : "default",
+          color: star <= (hover || rating) ? "#ffc107" : "#e0e0e0",
+          transition: "color 0.15s",
+        }}
+      >
+        ★
+      </span>
+    ));
+  };
+  
+  const now = new Date();
+
+  const cancelledEvents = events.filter(event => 
+    event.status === "cancelled" || event.eventStatus === "cancelled" ||
+    event.status === "draft" || event.eventStatus === "draft"
+  );
+  
+  const nonCancelledEvents = events.filter(event => 
+    event.status === "published" && event.eventStatus !== "cancelled"
+  );
+  
+  const upcomingEvents = nonCancelledEvents.filter(event => new Date(event.date) > now);
+  const completedEvents = nonCancelledEvents.filter(event => new Date(event.endDate || event.date) < now);
+  const normalEvents = nonCancelledEvents.filter(event => event.eventType === "normal");
+  const merchandiseEvents = nonCancelledEvents.filter(event => event.eventType === "merchandise");
+
+  const getFilteredEvents = () => {
+    switch (activeTab) {
+      case "upcoming":
+        return upcomingEvents;
+      case "normal":
+        return normalEvents;
+      case "merchandise":
+        return merchandiseEvents;
+      case "completed":
+        return completedEvents;
+      case "cancelled":
+        return cancelledEvents;
+      default:
+        return events;
+    }
+  };
+
+  const filteredEvents = getFilteredEvents();
+
   if (loading) return <h2 style={{ padding: "2rem" }}>Loading...</h2>;
 
   return (
     <div style={{ padding: "2rem" }}>
-      <h1>My Registered Events</h1>
+      <h1>My Events Dashboard</h1>
+      <p style={{ color: "#666", marginBottom: "2rem" }}>
+        Manage your event registrations and view participation history
+      </p>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      {events.length === 0 ? (
-        <p>You have not registered for any events yet.</p>
+      <div style={{ marginBottom: "2rem", borderBottom: "2px solid #ddd" }}>
+        {["upcoming", "normal", "merchandise", "completed", "cancelled"].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            style={{
+              padding: "0.75rem 1.5rem",
+              background: activeTab === tab ? "#007bff" : "transparent",
+              color: activeTab === tab ? "white" : "#007bff",
+              border: "none",
+              borderBottom: activeTab === tab ? "3px solid #007bff" : "none",
+              cursor: "pointer",
+              fontSize: "1rem",
+              fontWeight: activeTab === tab ? "bold" : "normal",
+              textTransform: "capitalize"
+            }}
+          >
+            {tab} ({
+              tab === "upcoming" ? upcomingEvents.length :
+              tab === "normal" ? normalEvents.length :
+              tab === "merchandise" ? merchandiseEvents.length :
+              tab === "completed" ? completedEvents.length :
+              cancelledEvents.length
+            })
+          </button>
+        ))}
+      </div>
+
+      {filteredEvents.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "3rem", background: "#f9f9f9", borderRadius: "8px" }}>
+          <p style={{ color: "#666", fontSize: "1.1rem" }}>
+            No events found in this category
+          </p>
+        </div>
       ) : (
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          {events.map((event) => (
-            <li
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))", gap: "1.5rem" }}>
+          {filteredEvents.map((event) => (
+            <div
               key={event._id}
               style={{
-                marginBottom: "1rem",
-                padding: "1rem",
+                padding: "1.5rem",
                 border: "1px solid #ddd",
                 borderRadius: "8px",
+                background: "white",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
               }}
             >
-              <h3>{event.title}</h3>
-              <p>{event.description}</p>
-              <p>
-                <strong>Type:</strong>{" "}
-                {event.eventType === "normal" 
-                  ? "Normal Event" 
-                  : "Merchandise Event"}
+              <h3 style={{ marginTop: 0, color: "#333" }}>{event.title}</h3>
+              
+              <div style={{ marginBottom: "1rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                <span style={{ 
+                  display: "inline-block",
+                  padding: "0.25rem 0.75rem", 
+                  background: event.eventType === "normal" ? "#28a745" : "#ff9800",
+                  color: "white",
+                  borderRadius: "12px",
+                  fontSize: "0.85rem",
+                  fontWeight: "bold"
+                }}>
+                  {event.eventType === "normal" ? "Normal Event" : "Merchandise"}
+                </span>
+                {(event.status === "cancelled" || event.eventStatus === "cancelled") && (
+                  <span style={{ 
+                    display: "inline-block",
+                    padding: "0.25rem 0.75rem", 
+                    background: "#dc3545",
+                    color: "white",
+                    borderRadius: "12px",
+                    fontSize: "0.85rem",
+                    fontWeight: "bold"
+                  }}>
+                    Cancelled
+                  </span>
+                )}
+                {(event.status === "draft" || event.eventStatus === "draft") && 
+                 event.status !== "cancelled" && event.eventStatus !== "cancelled" && (
+                  <span style={{ 
+                    display: "inline-block",
+                    padding: "0.25rem 0.75rem", 
+                    background: "#6c757d",
+                    color: "white",
+                    borderRadius: "12px",
+                    fontSize: "0.85rem",
+                    fontWeight: "bold"
+                  }}>
+                    Unpublished
+                  </span>
+                )}
+                {event.paymentStatus && event.paymentStatus !== "none" && (
+                  <span style={{
+                    display: "inline-block",
+                    padding: "0.25rem 0.75rem",
+                    background: event.paymentStatus === "approved" ? "#d4edda" : event.paymentStatus === "pending" ? "#fff3cd" : "#f8d7da",
+                    color: event.paymentStatus === "approved" ? "#155724" : event.paymentStatus === "pending" ? "#856404" : "#721c24",
+                    borderRadius: "12px",
+                    fontSize: "0.85rem",
+                    fontWeight: "bold",
+                  }}>
+                    Payment: {event.paymentStatus.charAt(0).toUpperCase() + event.paymentStatus.slice(1)}
+                  </span>
+                )}
+              </div>
+
+              <p style={{ color: "#666", fontSize: "0.95rem", marginBottom: "1rem" }}>
+                {event.description}
               </p>
-              <p>
-                <strong>Start Date:</strong>{" "}
-                {new Date(event.date).toLocaleDateString()}
-              </p>
-              {event.endDate && (
-                <p>
-                  <strong>End Date:</strong>{" "}
-                  {new Date(event.endDate).toLocaleDateString()}
+
+              <div style={{ fontSize: "0.9rem", lineHeight: "1.8" }}>
+                <p><strong>📅 Start:</strong> {new Date(event.date).toLocaleDateString()}</p>
+                {event.endDate && (
+                  <p><strong>📅 End:</strong> {new Date(event.endDate).toLocaleDateString()}</p>
+                )}
+                <p><strong>📍 Location:</strong> {event.location}</p>
+                {event.registrationFee > 0 && (
+                  <p><strong>💰 Fee Paid:</strong> ₹{event.registrationFee}</p>
+                )}
+                <p><strong>🎫 Ticket ID:</strong> 
+                  <span style={{ 
+                    background: "#e3f2fd", 
+                    padding: "0.2rem 0.5rem", 
+                    borderRadius: "4px",
+                    marginLeft: "0.5rem",
+                    fontFamily: "monospace",
+                    cursor: "pointer"
+                  }} title="Click to copy">
+                    {event.ticketId}
+                  </span>
                 </p>
-              )}
-              <p>
-                <strong>Location:</strong> {event.location}
-              </p>
-              {event.registrationFee > 0 && (
-                <p>
-                  <strong>Fee Paid:</strong> ₹{event.registrationFee}
-                </p>
-              )}
+                {event.attended !== undefined && (
+                  <p><strong>✓ Attended:</strong> {event.attended ? "Yes" : "No"}</p>
+                )}
+              </div>
+
               {event.tags && event.tags.length > 0 && (
-                <p>
-                  <strong>Tags:</strong>{" "}
+                <div style={{ marginTop: "1rem" }}>
                   {event.tags.map(tag => (
                     <span key={tag} style={{ 
                       display: "inline-block", 
                       background: "#e0e0e0", 
-                      padding: "0.2rem 0.4rem", 
+                      padding: "0.2rem 0.5rem", 
                       borderRadius: "3px", 
-                      marginRight: "0.3rem",
-                      fontSize: "0.85rem"
+                      marginRight: "0.4rem",
+                      marginBottom: "0.4rem",
+                      fontSize: "0.8rem"
                     }}>
                       {tag}
                     </span>
                   ))}
-                </p>
+                </div>
               )}
 
-              <button
-                style={{
-                  marginTop: "0.5rem",
-                  background: "red",
-                  color: "white",
-                  border: "none",
-                  padding: "0.5rem 1rem",
-                  borderRadius: "5px",
-                  cursor: "pointer",
-                }}
-                onClick={() => handleUnregister(event._id)}
-              >
-                Unregister
-              </button>
-              <p><strong>Ticket ID:</strong> {event.ticketId}</p>
-                <img
-                  src={event.qrCode}
-                  alt="QR Code"
-                  style={{ width: "120px", marginTop: "0.5rem" }}
-                />
+              {event.paymentStatus === "rejected" && event.rejectionReason && (
+                <div style={{ marginTop: "1rem", padding: "0.75rem", background: "#f8d7da", borderRadius: "6px", fontSize: "0.9rem", color: "#721c24" }}>
+                  <strong>Rejection Reason:</strong> {event.rejectionReason}
+                </div>
+              )}
 
-                <p>
-                  Status: {event.attended ? "Attended" : "Not Attended"}
-                </p>
-            </li>
+              {event.paymentStatus === "pending" && (
+                <div style={{ marginTop: "1rem", padding: "0.75rem", background: "#fff3cd", borderRadius: "6px", fontSize: "0.9rem", color: "#856404" }}>
+                  Payment is pending approval. QR code will be available once approved.
+                </div>
+              )}
+
+              {event.qrCode && (
+                <div style={{ textAlign: "center", marginTop: "1rem", padding: "1rem", background: "#f9f9f9", borderRadius: "8px" }}>
+                  <img
+                    src={event.qrCode}
+                    alt="QR Code"
+                    style={{ width: "120px", height: "120px" }}
+                  />
+                  <p style={{ fontSize: "0.8rem", color: "#666", marginTop: "0.5rem" }}>
+                    Show this QR at the event
+                  </p>
+                </div>
+              )}
+
+              {activeTab === "upcoming" && (
+                <button
+                  style={{
+                    marginTop: "1rem",
+                    width: "100%",
+                    background: "#dc3545",
+                    color: "white",
+                    border: "none",
+                    padding: "0.75rem",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                    fontWeight: "bold"
+                  }}
+                  onClick={() => handleUnregister(event._id)}
+                >
+                  Unregister
+                </button>
+              )}
+
+              {event.attended && (
+                <button
+                  onClick={() => openFeedbackModal(event)}
+                  style={{
+                    marginTop: "0.75rem",
+                    width: "100%",
+                    background: existingFeedbacks[event._id] ? "#6c757d" : "#ffc107",
+                    color: existingFeedbacks[event._id] ? "white" : "#333",
+                    border: "none",
+                    padding: "0.75rem",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                    fontWeight: "bold",
+                    fontSize: "0.95rem",
+                  }}
+                >
+                  {existingFeedbacks[event._id] ? "✓ Edit Feedback" : "⭐ Rate this Event"}
+                </button>
+              )}
+            </div>
           ))}
-        </ul>
+        </div>
+      )}
+
+      {feedbackModal && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center",
+          justifyContent: "center", zIndex: 1000,
+        }}>
+          <div style={{
+            background: "white", borderRadius: "12px", padding: "2rem",
+            maxWidth: "450px", width: "90%", textAlign: "center",
+          }}>
+            <h2 style={{ marginTop: 0, marginBottom: "0.25rem" }}>Rate your experience</h2>
+            <p style={{ color: "#666", marginBottom: "1.5rem", fontSize: "0.95rem" }}>{feedbackModal.title}</p>
+
+            <div style={{ marginBottom: "1.5rem" }}>
+              {renderStars(feedbackRating, feedbackHover, true)}
+              <p style={{ fontSize: "0.85rem", color: "#999", marginTop: "0.3rem" }}>
+                {feedbackRating === 1 ? "Terrible" : feedbackRating === 2 ? "Poor" : feedbackRating === 3 ? "Average" : feedbackRating === 4 ? "Good" : feedbackRating === 5 ? "Excellent" : "Tap a star to rate"}
+              </p>
+            </div>
+
+            <textarea
+              value={feedbackComment}
+              onChange={e => setFeedbackComment(e.target.value)}
+              placeholder="Describe your experience (optional)"
+              rows="4"
+              maxLength={1000}
+              style={{
+                width: "100%", padding: "0.75rem", border: "1px solid #ddd",
+                borderRadius: "8px", resize: "vertical", fontSize: "0.95rem",
+                boxSizing: "border-box", fontFamily: "inherit",
+              }}
+            />
+            <p style={{ fontSize: "0.75rem", color: "#bbb", textAlign: "right", margin: "0.25rem 0 1rem 0" }}>
+              {feedbackComment.length}/1000
+            </p>
+
+            <div style={{ padding: "0.5rem", background: "#f0f8ff", borderRadius: "6px", marginBottom: "1rem", fontSize: "0.8rem", color: "#666" }}>
+              🔒 Your feedback is anonymous — organizers cannot see your identity.
+            </div>
+
+            {feedbackMessage && (
+              <p style={{
+                color: feedbackMessage.includes("submitted") || feedbackMessage.includes("updated") ? "#28a745" : "#dc3545",
+                fontSize: "0.9rem", marginBottom: "0.75rem",
+              }}>{feedbackMessage}</p>
+            )}
+
+            <div style={{ display: "flex", gap: "0.75rem" }}>
+              <button
+                onClick={handleSubmitFeedback}
+                disabled={feedbackSubmitting || feedbackRating === 0}
+                style={{
+                  flex: 1, padding: "0.75rem", border: "none", borderRadius: "8px",
+                  background: feedbackRating > 0 ? "#28a745" : "#ccc",
+                  color: "white", fontWeight: "bold", fontSize: "1rem",
+                  cursor: feedbackRating > 0 ? "pointer" : "not-allowed",
+                }}
+              >
+                {feedbackSubmitting ? "Submitting..." : "Submit"}
+              </button>
+              <button
+                onClick={() => setFeedbackModal(null)}
+                style={{
+                  flex: 1, padding: "0.75rem", border: "1px solid #ddd", borderRadius: "8px",
+                  background: "white", color: "#666", fontWeight: "bold", fontSize: "1rem", cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

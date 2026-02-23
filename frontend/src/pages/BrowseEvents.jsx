@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 function BrowseEvents() {
+  const [allEvents, setAllEvents] = useState([]);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -8,6 +10,13 @@ function BrowseEvents() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [customFormResponses, setCustomFormResponses] = useState({});
+  
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState("all");
+  const [filterEligibility, setFilterEligibility] = useState("all");
+  const [filterStartDate, setFilterStartDate] = useState("");
+  const [filterEndDate, setFilterEndDate] = useState("");
+  const [showFollowedOnly, setShowFollowedOnly] = useState(false);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -17,6 +26,7 @@ function BrowseEvents() {
 
         if (!res.ok) throw new Error(data.message);
 
+        setAllEvents(data);
         setEvents(data);
       } catch (err) {
         setError(err.message);
@@ -27,6 +37,48 @@ function BrowseEvents() {
 
     fetchEvents();
   }, []);
+
+  useEffect(() => {
+    filterAndSearchEvents();
+  }, [searchQuery, filterType, filterEligibility, filterStartDate, filterEndDate, showFollowedOnly, allEvents]);
+
+  const filterAndSearchEvents = () => {
+    let filtered = [...allEvents];
+
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(event => 
+        event.title.toLowerCase().includes(query) ||
+        event.description.toLowerCase().includes(query) ||
+        (event.createdBy?.email && event.createdBy.email.toLowerCase().includes(query)) ||
+        (event.createdBy?.organizerName && event.createdBy.organizerName.toLowerCase().includes(query))
+      );
+    }
+
+    if (filterType !== "all") {
+      filtered = filtered.filter(event => event.eventType === filterType);
+    }
+
+    if (filterEligibility !== "all") {
+      filtered = filtered.filter(event => 
+        event.eligibility && event.eligibility.toLowerCase().includes(filterEligibility.toLowerCase())
+      );
+    }
+
+    if (filterStartDate) {
+      filtered = filtered.filter(event => 
+        new Date(event.date) >= new Date(filterStartDate)
+      );
+    }
+
+    if (filterEndDate) {
+      filtered = filtered.filter(event => 
+        new Date(event.date) <= new Date(filterEndDate)
+      );
+    }
+
+    setEvents(filtered);
+  };
 
   const openRegistrationModal = (event) => {
     setSelectedEvent(event);
@@ -69,6 +121,8 @@ function BrowseEvents() {
 
       setMessage("Registered successfully!");
       closeModal();
+      
+      setTimeout(() => setMessage(""), 3000);
     } catch (err) {
       setMessage(err.message);
     }
@@ -77,97 +131,258 @@ function BrowseEvents() {
   if (loading) return <h2 style={{ padding: "2rem" }}>Loading events...</h2>;
 
   return (
-    <div style={{ padding: "2rem" }}>
+    <div style={{ padding: "2rem", maxWidth: "1400px", margin: "0 auto" }}>
       <h1>Browse Events</h1>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
-      {message && <p style={{ color: "green" }}>{message}</p>}
+      {message && (
+        <div style={{ 
+          padding: "1rem", 
+          background: "#d4edda", 
+          color: "#155724", 
+          borderRadius: "4px", 
+          marginBottom: "1rem" 
+        }}>
+          {message}
+        </div>
+      )}
+
+      <div style={{ 
+        background: "#f8f9fa", 
+        padding: "1.5rem", 
+        borderRadius: "8px", 
+        marginBottom: "2rem" 
+      }}>
+        <div style={{ marginBottom: "1rem" }}>
+          <input
+            type="text"
+            placeholder="🔍 Search events or organizers..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "0.75rem",
+              fontSize: "1rem",
+              border: "2px solid #ddd",
+              borderRadius: "8px",
+              outline: "none"
+            }}
+          />
+        </div>
+
+        <div style={{ 
+          display: "grid", 
+          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", 
+          gap: "1rem",
+          marginBottom: "1rem"
+        }}>
+          <div>
+            <label style={{ display: "block", marginBottom: "0.3rem", fontWeight: "bold", fontSize: "0.9rem" }}>
+              Event Type
+            </label>
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ddd" }}
+            >
+              <option value="all">All Types</option>
+              <option value="normal">Normal Events</option>
+              <option value="merchandise">Merchandise</option>
+            </select>
+          </div>
+
+          <div>
+            <label style={{ display: "block", marginBottom: "0.3rem", fontWeight: "bold", fontSize: "0.9rem" }}>
+              Eligibility
+            </label>
+            <select
+              value={filterEligibility}
+              onChange={(e) => setFilterEligibility(e.target.value)}
+              style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ddd" }}
+            >
+              <option value="all">All</option>
+              <option value="iiit">IIIT Only</option>
+              <option value="all participants">All Participants</option>
+            </select>
+          </div>
+
+          <div>
+            <label style={{ display: "block", marginBottom: "0.3rem", fontWeight: "bold", fontSize: "0.9rem" }}>
+              From Date
+            </label>
+            <input
+              type="date"
+              value={filterStartDate}
+              onChange={(e) => setFilterStartDate(e.target.value)}
+              style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ddd" }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: "block", marginBottom: "0.3rem", fontWeight: "bold", fontSize: "0.9rem" }}>
+              To Date
+            </label>
+            <input
+              type="date"
+              value={filterEndDate}
+              onChange={(e) => setFilterEndDate(e.target.value)}
+              style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ddd" }}
+            />
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+          <button
+            onClick={() => {
+              setSearchQuery("");
+              setFilterType("all");
+              setFilterEligibility("all");
+              setFilterStartDate("");
+              setFilterEndDate("");
+            }}
+            style={{
+              padding: "0.5rem 1rem",
+              background: "#6c757d",
+              color: "white",
+              border: "none",
+              borderRadius: "20px",
+              cursor: "pointer"
+            }}
+          >
+            Clear Filters
+          </button>
+        </div>
+
+        <p style={{ marginTop: "1rem", color: "#666", fontSize: "0.9rem" }}>
+          Showing {events.length} event{events.length !== 1 ? "s" : ""}
+        </p>
+      </div>
 
       {events.length === 0 ? (
-        <p>No events available right now.</p>
+        <div style={{ 
+          textAlign: "center", 
+          padding: "3rem", 
+          background: "#f9f9f9", 
+          borderRadius: "8px" 
+        }}>
+          <p style={{ color: "#666", fontSize: "1.1rem" }}>
+            No events found matching your criteria
+          </p>
+        </div>
       ) : (
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          {events.map((event) => (
-            <li
-              key={event._id}
-              style={{
-                marginBottom: "1rem",
-                padding: "1rem",
-                border: "1px solid #ddd",
-                borderRadius: "8px",
-              }}
-            >
-              <h3>{event.title}</h3>
-              <p>{event.description}</p>
-              <p>
-                <strong>Type:</strong>{" "}
-                {event.eventType === "normal" 
-                  ? "Normal Event" 
-                  : "Merchandise Event"}
-              </p>
-              <p>
-                <strong>Start Date:</strong>{" "}
-                {new Date(event.date).toLocaleDateString()}
-              </p>
-              {event.endDate && (
-                <p>
-                  <strong>End Date:</strong>{" "}
-                  {new Date(event.endDate).toLocaleDateString()}
-                </p>
-              )}
-              <p>
-                <strong>Location:</strong> {event.location}
-              </p>
-              <p>
-                <strong>Eligibility:</strong> {event.eligibility || "All participants"}
-              </p>
-              <p>
-                <strong>Registration Fee:</strong> ₹{event.registrationFee || 0}
-              </p>
-              <p>
-                <strong>Registration Deadline:</strong>{" "}
-                {new Date(event.registrationDeadline).toLocaleDateString()}
-              </p>
-              {event.tags && event.tags.length > 0 && (
-                <p>
-                  <strong>Tags:</strong>{" "}
-                  {event.tags.map(tag => (
-                    <span key={tag} style={{ 
-                      display: "inline-block", 
-                      background: "#e0e0e0", 
-                      padding: "0.2rem 0.5rem", 
-                      borderRadius: "4px", 
-                      marginRight: "0.3rem",
-                      fontSize: "0.85rem"
-                    }}>
-                      {tag}
-                    </span>
-                  ))}
-                </p>
-              )}
-              {event.eventType === "merchandise" && event.merchandiseDetails && (
-                <div style={{ marginTop: "0.5rem", padding: "0.5rem", background: "#f9f9f9", borderRadius: "4px" }}>
-                  <strong>Merchandise Details:</strong>
-                  {event.merchandiseDetails.sizes?.length > 0 && (
-                    <p>Sizes: {event.merchandiseDetails.sizes.join(", ")}</p>
-                  )}
-                  {event.merchandiseDetails.colors?.length > 0 && (
-                    <p>Colors: {event.merchandiseDetails.colors.join(", ")}</p>
-                  )}
-                  {event.merchandiseDetails.variants?.length > 0 && (
-                    <p>Variants: {event.merchandiseDetails.variants.join(", ")}</p>
-                  )}
-                  <p>Stock: {event.merchandiseDetails.stockQuantity || 0}</p>
-                  <p>Max per person: {event.merchandiseDetails.purchaseLimitPerParticipant || 1}</p>
-                </div>
-              )}
+        <div style={{ 
+          display: "grid", 
+          gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))", 
+          gap: "1.5rem" 
+        }}>
+          {events.map((event) => {
+            const isDeadlinePassed = new Date(event.registrationDeadline) < new Date();
+            const isCapacityFull = event.registeredCount >= event.capacity;
+            const canRegister = !isDeadlinePassed && !isCapacityFull;
 
-              <button onClick={() => openRegistrationModal(event)}>
-                Register
-              </button>
-            </li>
-          ))}
-        </ul>
+            return (
+              <div
+                key={event._id}
+                style={{
+                  padding: "1.5rem",
+                  border: "1px solid #ddd",
+                  borderRadius: "8px",
+                  background: "white",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  display: "flex",
+                  flexDirection: "column"
+                }}
+              >
+                <div style={{ marginBottom: "1rem" }}>
+                  <Link 
+                    to={`/events/${event._id}`}
+                    style={{ 
+                      textDecoration: "none", 
+                      color: "#007bff",
+                      fontSize: "1.3rem",
+                      fontWeight: "bold"
+                    }}
+                  >
+                    {event.title}
+                  </Link>
+                </div>
+
+                <span style={{ 
+                  display: "inline-block",
+                  padding: "0.25rem 0.75rem", 
+                  background: event.eventType === "normal" ? "#28a745" : "#ff9800",
+                  color: "white",
+                  borderRadius: "12px",
+                  fontSize: "0.75rem",
+                  fontWeight: "bold",
+                  marginBottom: "1rem",
+                  width: "fit-content"
+                }}>
+                  {event.eventType === "normal" ? "Normal Event" : "Merchandise"}
+                </span>
+
+                <p style={{ color: "#666", fontSize: "0.95rem", marginBottom: "1rem", flexGrow: 1 }}>
+                  {event.description.length > 150 
+                    ? event.description.substring(0, 150) + "..." 
+                    : event.description}
+                </p>
+
+                <div style={{ fontSize: "0.9rem", lineHeight: "1.8", marginBottom: "1rem" }}>
+                  <p><strong>📅</strong> {new Date(event.date).toLocaleDateString()}</p>
+                  <p><strong>📍</strong> {event.location}</p>
+                  <p><strong>✓</strong> {event.eligibility || "All participants"}</p>
+                  <p><strong>💰</strong> ₹{event.registrationFee || 0}</p>
+                  <p><strong>🎟️</strong> {event.registeredCount || 0} / {event.capacity} registered</p>
+                </div>
+
+                {event.tags && event.tags.length > 0 && (
+                  <div style={{ marginBottom: "1rem" }}>
+                    {event.tags.slice(0, 3).map(tag => (
+                      <span key={tag} style={{ 
+                        display: "inline-block", 
+                        background: "#e0e0e0", 
+                        padding: "0.2rem 0.5rem", 
+                        borderRadius: "3px", 
+                        marginRight: "0.4rem",
+                        fontSize: "0.75rem"
+                      }}>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {!canRegister && (
+                  <p style={{ 
+                    color: "#dc3545", 
+                    fontWeight: "bold", 
+                    fontSize: "0.9rem",
+                    marginBottom: "0.5rem"
+                  }}>
+                    {isDeadlinePassed ? "⏰ Registration closed" : "👥 Event full"}
+                  </p>
+                )}
+
+                <button 
+                  onClick={() => canRegister && openRegistrationModal(event)}
+                  disabled={!canRegister}
+                  style={{
+                    width: "100%",
+                    padding: "0.75rem",
+                    background: canRegister ? "#007bff" : "#ccc",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: canRegister ? "pointer" : "not-allowed",
+                    fontWeight: "bold"
+                  }}
+                >
+                  {canRegister ? "Register Now" : "Registration Unavailable"}
+                </button>
+              </div>
+            );
+          })}
+        </div>
       )}
 
       {showModal && selectedEvent && (

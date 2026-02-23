@@ -207,6 +207,8 @@ const getUserProfile = async (req, res) => {
       organizerName: user.organizerName,
       category: user.category,
       description: user.description,
+      discordWebhook: user.discordWebhook,
+      contactEmail: user.contactEmail,
       createdAt: user.createdAt,
     });
   } catch (error) {
@@ -229,6 +231,8 @@ const updateUserProfile = async (req, res) => {
       organizerName,
       category,
       description,
+      discordWebhook,
+      contactEmail,
     } = req.body;
 
     if (user.role === "participant") {
@@ -247,6 +251,8 @@ const updateUserProfile = async (req, res) => {
       if (organizerName !== undefined) user.organizerName = organizerName;
       if (category !== undefined) user.category = category;
       if (description !== undefined) user.description = description;
+      if (discordWebhook !== undefined) user.discordWebhook = discordWebhook;
+      if (contactEmail !== undefined) user.contactEmail = contactEmail;
     }
 
     await user.save();
@@ -272,11 +278,48 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
+const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        message: "Current password and new password are required",
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        message: "New password must be at least 6 characters long",
+      });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Current password is incorrect" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+
+    await user.save();
+
+    res.json({ message: "Password changed successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   loginUser,
   registerUser,
   verifyToken,
   getUserProfile,
   updateUserProfile,
+  changePassword,
 };
-

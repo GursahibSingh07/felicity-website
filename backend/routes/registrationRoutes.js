@@ -7,6 +7,13 @@ const {
   unregisterFromEvent,
   markAttendance,
   validateTicket,
+  getPendingPayments,
+  approvePayment,
+  rejectPayment,
+  scanQRAttendance,
+  manualOverrideAttendance,
+  getAttendanceDashboard,
+  exportAttendanceCSV,
 } = require("../controllers/registrationController");
 
 router.get(
@@ -35,6 +42,55 @@ router.get(
   protect,
   authorize("organizer"),
   validateTicket
+);
+
+router.get(
+  "/payments/pending/:eventId",
+  protect,
+  authorize("organizer"),
+  getPendingPayments
+);
+
+router.patch(
+  "/payments/approve/:registrationId",
+  protect,
+  authorize("organizer"),
+  approvePayment
+);
+
+router.patch(
+  "/payments/reject/:registrationId",
+  protect,
+  authorize("organizer"),
+  rejectPayment
+);
+
+router.post(
+  "/scan/:ticketId",
+  protect,
+  authorize("organizer"),
+  scanQRAttendance
+);
+
+router.patch(
+  "/manual-override/:registrationId",
+  protect,
+  authorize("organizer"),
+  manualOverrideAttendance
+);
+
+router.get(
+  "/attendance/:eventId",
+  protect,
+  authorize("organizer"),
+  getAttendanceDashboard
+);
+
+router.get(
+  "/attendance/:eventId/export",
+  protect,
+  authorize("organizer"),
+  exportAttendanceCSV
 );
 
 module.exports = router;

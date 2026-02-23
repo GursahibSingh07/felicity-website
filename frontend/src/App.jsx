@@ -7,12 +7,19 @@ import OrganizerDashboard from "./pages/OrganizerDashboard";
 import ParticipantDashboard from "./pages/ParticipantDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import BrowseEvents from "./pages/BrowseEvents";
+import EventDetails from "./pages/EventDetails";
+import ClubsOrganizers from "./pages/ClubsOrganizers";
+import OrganizerDetail from "./pages/OrganizerDetail";
 import CreateEvent from "./pages/CreateEvent";
 import EditEvent from "./pages/EditEvent";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import Onboarding from "./pages/Onboarding";
 import Profile from "./pages/Profile";
 import Home from "./pages/Home";
+import OrganizerEventDetail from "./pages/OrganizerEventDetail";
+import OngoingEvents from "./pages/OngoingEvents";
+import ManageOrganizers from "./pages/ManageOrganizers";
+import QRScanner from "./pages/QRScanner";
 
 
 
@@ -64,6 +71,33 @@ function App() {
         />
 
         <Route
+          path="/events/:id"
+          element={
+            <ProtectedRoute allowedRoles={["participant"]}>
+              <EventDetails />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/clubs"
+          element={
+            <ProtectedRoute allowedRoles={["participant"]}>
+              <ClubsOrganizers />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/clubs/:id"
+          element={
+            <ProtectedRoute allowedRoles={["participant"]}>
+              <OrganizerDetail />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/organizer/create"
           element={
             <ProtectedRoute allowedRoles={["organizer"]}>
@@ -82,11 +116,47 @@ function App() {
         />
 
         <Route
+          path="/organizer/events/:id"
+          element={
+            <ProtectedRoute allowedRoles={["organizer"]}>
+              <OrganizerEventDetail />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/organizer/ongoing"
+          element={
+            <ProtectedRoute allowedRoles={["organizer"]}>
+              <OngoingEvents />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/organizer/scanner/:eventId"
+          element={
+            <ProtectedRoute allowedRoles={["organizer"]}>
+              <QRScanner />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/admin/analytics"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <AdminAnalytics />
               </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/organizers"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <ManageOrganizers />
+            </ProtectedRoute>
           }
         />
 

@@ -18,6 +18,15 @@ function Profile() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: ""
+  });
+  const [resetReason, setResetReason] = useState("");
+  const [resetRequests, setResetRequests] = useState([]);
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetSubmitting, setResetSubmitting] = useState(false);
 
   const token = localStorage.getItem("token");
 
@@ -75,6 +84,54 @@ function Profile() {
 
     fetchData();
   }, [token, user]);
+
+  useEffect(() => {
+    if (user?.role === "organizer") {
+      fetchResetRequests();
+    }
+  }, [user]);
+
+  const fetchResetRequests = async () => {
+    setResetLoading(true);
+    try {
+      const res = await fetch("http://localhost:5000/api/admin/my-reset-requests", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setResetRequests(data);
+      }
+    } catch {} finally {
+      setResetLoading(false);
+    }
+  };
+
+  const handleSubmitResetRequest = async () => {
+    if (!resetReason.trim()) {
+      setError("Please provide a reason for the password reset request");
+      return;
+    }
+    setResetSubmitting(true);
+    setError("");
+    setSuccess("");
+    try {
+      const res = await fetch("http://localhost:5000/api/admin/reset-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ reason: resetReason }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      setSuccess(data.message);
+      setResetReason("");
+      fetchResetRequests();
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setResetSubmitting(false);
+    }
+  };
 
   const handleInterestToggle = (interest) => {
     setSelectedInterests((prev) =>
@@ -180,6 +237,56 @@ function Profile() {
     setEditedProfile((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handlePasswordChange = async () => {
+    setError("");
+    setSuccess("");
+
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+      setError("All password fields are required");
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setError("New passwords do not match");
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      setError("New password must be at least 6 characters long");
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/change-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || "Failed to change password");
+      }
+
+      setSuccess("Password changed successfully!");
+      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (!user) {
     return (
       <div style={{ padding: "2rem", textAlign: "center" }}>
@@ -226,6 +333,26 @@ function Profile() {
           >
             Account
           </button>
+          <button
+            onClick={() => setActiveTab("security")}
+            style={{
+              ...styles.tab,
+              ...(activeTab === "security" ? styles.tabActive : {}),
+            }}
+          >
+            Security
+          </button>
+          {user?.role === "organizer" && (
+            <button
+              onClick={() => setActiveTab("resetRequest")}
+              style={{
+                ...styles.tab,
+                ...(activeTab === "resetRequest" ? styles.tabActive : {}),
+              }}
+            >
+              Password Reset
+            </button>
+          )}
         </div>
 
         {activeTab === "preferences" && user?.role === "participant" && (
@@ -397,6 +524,31 @@ function Profile() {
                       style={{...styles.input, minHeight: "80px", resize: "vertical"}}
                     />
                   </div>
+
+                  <div style={styles.editRow}>
+                    <label>Contact Email (public):</label>
+                    <input
+                      type="email"
+                      value={editedProfile.contactEmail || ""}
+                      onChange={(e) => handleProfileChange("contactEmail", e.target.value)}
+                      style={styles.input}
+                      placeholder="Public contact email shown to participants"
+                    />
+                  </div>
+
+                  <div style={styles.editRow}>
+                    <label>Discord Webhook URL:</label>
+                    <input
+                      type="url"
+                      value={editedProfile.discordWebhook || ""}
+                      onChange={(e) => handleProfileChange("discordWebhook", e.target.value)}
+                      style={styles.input}
+                      placeholder="https://discord.com/api/webhooks/..."
+                    />
+                    <span style={{ fontSize: "0.8rem", color: "#888", marginTop: "0.35rem" }}>
+                      When set, new published events will be announced to your Discord channel automatically.
+                    </span>
+                  </div>
                 </>
               )}
             </div>
@@ -416,6 +568,150 @@ function Profile() {
 
             <div style={styles.note}>
               To change your email or password, please contact support.
+            </div>
+          </div>
+        )}
+
+        {activeTab === "security" && (
+          <div style={styles.tabContent}>
+            <div style={styles.section}>
+              <h3>Change Password</h3>
+              <p style={styles.sectionDesc}>
+                Update your password to keep your account secure.
+              </p>
+
+              <div style={styles.editRow}>
+                <label>Current Password:</label>
+                <input
+                  type="password"
+                  value={passwordData.currentPassword}
+                  onChange={(e) =>
+                    setPasswordData({
+                      ...passwordData,
+                      currentPassword: e.target.value,
+                    })
+                  }
+                  style={styles.input}
+                  placeholder="Enter current password"
+                />
+              </div>
+
+              <div style={styles.editRow}>
+                <label>New Password:</label>
+                <input
+                  type="password"
+                  value={passwordData.newPassword}
+                  onChange={(e) =>
+                    setPasswordData({
+                      ...passwordData,
+                      newPassword: e.target.value,
+                    })
+                  }
+                  style={styles.input}
+                  placeholder="Enter new password (min 6 characters)"
+                />
+              </div>
+
+              <div style={styles.editRow}>
+                <label>Confirm New Password:</label>
+                <input
+                  type="password"
+                  value={passwordData.confirmPassword}
+                  onChange={(e) =>
+                    setPasswordData({
+                      ...passwordData,
+                      confirmPassword: e.target.value,
+                    })
+                  }
+                  style={styles.input}
+                  placeholder="Re-enter new password"
+                />
+              </div>
+            </div>
+
+            <button
+              onClick={handlePasswordChange}
+              disabled={saving}
+              style={{
+                ...styles.saveButton,
+                ...(saving ? styles.buttonDisabled : {}),
+              }}
+            >
+              {saving ? "Changing..." : "Change Password"}
+            </button>
+          </div>
+        )}
+
+        {activeTab === "resetRequest" && user?.role === "organizer" && (
+          <div style={styles.tabContent}>
+            {error && <div style={styles.error}>{error}</div>}
+            {success && <div style={styles.success}>{success}</div>}
+
+            <div style={styles.section}>
+              <h3>Request Password Reset from Admin</h3>
+              <p style={styles.sectionDesc}>
+                If you need your password reset, submit a request to the admin. You will receive a new auto-generated password once approved.
+              </p>
+
+              <div style={styles.editRow}>
+                <label>Reason for Reset:</label>
+                <textarea
+                  value={resetReason}
+                  onChange={e => setResetReason(e.target.value)}
+                  style={{ ...styles.input, minHeight: "80px", resize: "vertical" }}
+                  placeholder="Explain why you need a password reset"
+                  maxLength={500}
+                />
+              </div>
+
+              <button
+                onClick={handleSubmitResetRequest}
+                disabled={resetSubmitting || !resetReason.trim()}
+                style={{
+                  ...styles.saveButton,
+                  background: resetSubmitting || !resetReason.trim() ? "#ccc" : "#e67e22",
+                  cursor: resetSubmitting || !resetReason.trim() ? "not-allowed" : "pointer",
+                }}
+              >
+                {resetSubmitting ? "Submitting..." : "Submit Reset Request"}
+              </button>
+            </div>
+
+            <div style={styles.section}>
+              <h3>Request History</h3>
+              {resetLoading ? (
+                <p>Loading...</p>
+              ) : resetRequests.length === 0 ? (
+                <p style={styles.noData}>No password reset requests yet.</p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                  {resetRequests.map(req => (
+                    <div key={req._id} style={{
+                      padding: "1rem",
+                      background: req.status === "pending" ? "#fff3cd" : req.status === "approved" ? "#d4edda" : "#f8d7da",
+                      borderRadius: "8px",
+                      border: `1px solid ${req.status === "pending" ? "#ffc107" : req.status === "approved" ? "#28a745" : "#dc3545"}`,
+                    }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{
+                          padding: "0.2rem 0.6rem",
+                          borderRadius: "12px",
+                          fontSize: "0.8rem",
+                          fontWeight: "bold",
+                          color: "white",
+                          background: req.status === "pending" ? "#ffc107" : req.status === "approved" ? "#28a745" : "#dc3545",
+                        }}>
+                          {req.status.toUpperCase()}
+                        </span>
+                        <span style={{ fontSize: "0.8rem", color: "#666" }}>{new Date(req.createdAt).toLocaleDateString()}</span>
+                      </div>
+                      <p style={{ margin: "0.5rem 0 0 0", fontSize: "0.9rem" }}><strong>Reason:</strong> {req.reason}</p>
+                      {req.adminComment && <p style={{ margin: "0.3rem 0 0 0", fontSize: "0.85rem", color: "#555" }}><strong>Admin Comment:</strong> {req.adminComment}</p>}
+                      {req.processedAt && <p style={{ margin: "0.3rem 0 0 0", fontSize: "0.8rem", color: "#888" }}>Processed: {new Date(req.processedAt).toLocaleString()}</p>}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}

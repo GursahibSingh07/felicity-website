@@ -9,6 +9,12 @@ const {
   resetOrganizerPassword,
   getAllOrganizers,
   deleteOrganizer,
+  toggleOrganizerStatus,
+  requestPasswordReset,
+  getMyResetRequests,
+  getAllResetRequests,
+  approveResetRequest,
+  rejectResetRequest,
 } = require("../controllers/adminController");
 
 router.post("/provision-first-admin", provisionFirstAdmin);
@@ -43,11 +49,53 @@ router.post(
   resetOrganizerPassword
 );
 
+router.patch(
+  "/organizers/:organizerId/toggle",
+  protect,
+  authorize("admin"),
+  toggleOrganizerStatus
+);
+
 router.delete(
   "/organizers/:organizerId",
   protect,
   authorize("admin"),
   deleteOrganizer
+);
+
+router.post(
+  "/reset-request",
+  protect,
+  authorize("organizer"),
+  requestPasswordReset
+);
+
+router.get(
+  "/my-reset-requests",
+  protect,
+  authorize("organizer"),
+  getMyResetRequests
+);
+
+router.get(
+  "/reset-requests",
+  protect,
+  authorize("admin"),
+  getAllResetRequests
+);
+
+router.patch(
+  "/reset-requests/:requestId/approve",
+  protect,
+  authorize("admin"),
+  approveResetRequest
+);
+
+router.patch(
+  "/reset-requests/:requestId/reject",
+  protect,
+  authorize("admin"),
+  rejectResetRequest
 );
 
 module.exports = router;
