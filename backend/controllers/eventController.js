@@ -2,14 +2,14 @@ const Event = require("../models/Event");
 const Registration = require("../models/Registration");
 const User = require("../models/User");
 const { sendTicketEmail } = require("../utils/emailService");
+const https = require("https");
+const http = require("http");
 
-const postToDiscord = async (webhookUrl, event, organizerName) => {
-  if (!webhookUrl) return;
-  try {
-    await fetch(webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+const postToDiscord = (webhookUrl, event, organizerName) => {
+  if (!webhookUrl) return Promise.resolve();
+  return new Promise((resolve) => {
+    try {
+      const payload = JSON.stringify({
         embeds: [{
           title: `New Event: ${event.title}`,
           description: event.description?.slice(0, 200) || "",
@@ -19,17 +19,41 @@ const postToDiscord = async (webhookUrl, event, organizerName) => {
             { name: "Type", value: event.eventType === "merchandise" ? "Merchandise" : "Normal", inline: true },
             { name: "Date", value: new Date(event.date).toLocaleDateString(), inline: true },
             { name: "Location", value: event.location || "TBD", inline: true },
-            { name: "Fee", value: event.registrationFee > 0 ? `₹${event.registrationFee}` : "Free", inline: true },
+            { name: "Fee", value: event.registrationFee > 0 ? `\u20b9${event.registrationFee}` : "Free", inline: true },
             { name: "Capacity", value: String(event.capacity), inline: true },
           ],
           footer: { text: "Event Management System" },
           timestamp: new Date().toISOString(),
         }],
-      }),
-    });
-  } catch (e) {
-    console.error("Discord webhook failed:", e.message);
-  }
+      });
+
+      const url = new URL(webhookUrl);
+      const lib = url.protocol === "https:" ? https : http;
+      const options = {
+        hostname: url.hostname,
+        path: url.pathname + url.search,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Length": Buffer.byteLength(payload),
+        },
+      };
+
+      const req = lib.request(options, (res) => {
+        res.resume();
+        res.on("end", resolve);
+      });
+      req.on("error", (e) => {
+        console.error("Discord webhook failed:", e.message);
+        resolve();
+      });
+      req.write(payload);
+      req.end();
+    } catch (e) {
+      console.error("Discord webhook failed:", e.message);
+      resolve();
+    }
+  });
 };
 
 exports.createEvent = async (req, res) => {
