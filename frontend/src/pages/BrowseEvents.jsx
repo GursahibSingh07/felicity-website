@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function BrowseEvents() {
+  const { user } = useAuth();
   const [allEvents, setAllEvents] = useState([]);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -128,7 +130,7 @@ function BrowseEvents() {
     }
   };
 
-  if (loading) return <h2 style={{ padding: "2rem" }}>Loading events...</h2>;
+  if (loading) return <h2 style={{ padding: "2rem", textAlign: "center", color: "#64748b" }}>Loading events...</h2>;
 
   return (
     <div style={{ padding: "2rem", maxWidth: "1400px", margin: "0 auto" }}>
@@ -138,20 +140,23 @@ function BrowseEvents() {
       {message && (
         <div style={{ 
           padding: "1rem", 
-          background: "#d4edda", 
-          color: "#155724", 
-          borderRadius: "4px", 
-          marginBottom: "1rem" 
+          background: "#d1fae5", 
+          color: "#065f46", 
+          borderRadius: "10px", 
+          marginBottom: "1rem",
+          fontWeight: "500"
         }}>
           {message}
         </div>
       )}
 
       <div style={{ 
-        background: "#f8f9fa", 
+        background: "white", 
         padding: "1.5rem", 
-        borderRadius: "8px", 
-        marginBottom: "2rem" 
+        borderRadius: "16px", 
+        marginBottom: "2rem",
+        border: "1px solid #e2e8f0",
+        boxShadow: "0 4px 12px rgba(99,102,241,0.06)"
       }}>
         <div style={{ marginBottom: "1rem" }}>
           <input
@@ -161,11 +166,13 @@ function BrowseEvents() {
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
               width: "100%",
-              padding: "0.75rem",
-              fontSize: "1rem",
-              border: "2px solid #ddd",
-              borderRadius: "8px",
-              outline: "none"
+              padding: "0.75rem 1rem",
+              fontSize: "0.95rem",
+              border: "1.5px solid #e2e8f0",
+              borderRadius: "10px",
+              outline: "none",
+              background: "#f8fafc",
+              transition: "all 0.2s"
             }}
           />
         </div>
@@ -177,13 +184,13 @@ function BrowseEvents() {
           marginBottom: "1rem"
         }}>
           <div>
-            <label style={{ display: "block", marginBottom: "0.3rem", fontWeight: "bold", fontSize: "0.9rem" }}>
+            <label style={{ display: "block", marginBottom: "0.3rem", fontWeight: "600", fontSize: "0.85rem", color: "#475569" }}>
               Event Type
             </label>
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ddd" }}
+              style={{ width: "100%", padding: "0.5rem", borderRadius: "8px", border: "1.5px solid #e2e8f0" }}
             >
               <option value="all">All Types</option>
               <option value="normal">Normal Events</option>
@@ -192,13 +199,13 @@ function BrowseEvents() {
           </div>
 
           <div>
-            <label style={{ display: "block", marginBottom: "0.3rem", fontWeight: "bold", fontSize: "0.9rem" }}>
+            <label style={{ display: "block", marginBottom: "0.3rem", fontWeight: "600", fontSize: "0.85rem", color: "#475569" }}>
               Eligibility
             </label>
             <select
               value={filterEligibility}
               onChange={(e) => setFilterEligibility(e.target.value)}
-              style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ddd" }}
+              style={{ width: "100%", padding: "0.5rem", borderRadius: "8px", border: "1.5px solid #e2e8f0" }}
             >
               <option value="all">All</option>
               <option value="iiit">IIIT Only</option>
@@ -207,26 +214,26 @@ function BrowseEvents() {
           </div>
 
           <div>
-            <label style={{ display: "block", marginBottom: "0.3rem", fontWeight: "bold", fontSize: "0.9rem" }}>
+            <label style={{ display: "block", marginBottom: "0.3rem", fontWeight: "600", fontSize: "0.85rem", color: "#475569" }}>
               From Date
             </label>
             <input
               type="date"
               value={filterStartDate}
               onChange={(e) => setFilterStartDate(e.target.value)}
-              style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ddd" }}
+              style={{ width: "100%", padding: "0.5rem", borderRadius: "8px", border: "1.5px solid #e2e8f0" }}
             />
           </div>
 
           <div>
-            <label style={{ display: "block", marginBottom: "0.3rem", fontWeight: "bold", fontSize: "0.9rem" }}>
+            <label style={{ display: "block", marginBottom: "0.3rem", fontWeight: "600", fontSize: "0.85rem", color: "#475569" }}>
               To Date
             </label>
             <input
               type="date"
               value={filterEndDate}
               onChange={(e) => setFilterEndDate(e.target.value)}
-              style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ddd" }}
+              style={{ width: "100%", padding: "0.5rem", borderRadius: "8px", border: "1.5px solid #e2e8f0" }}
             />
           </div>
         </div>
@@ -242,18 +249,20 @@ function BrowseEvents() {
             }}
             style={{
               padding: "0.5rem 1rem",
-              background: "#6c757d",
+              background: "#64748b",
               color: "white",
               border: "none",
               borderRadius: "20px",
-              cursor: "pointer"
+              cursor: "pointer",
+              fontSize: "0.85rem",
+              fontWeight: "500"
             }}
           >
             Clear Filters
           </button>
         </div>
 
-        <p style={{ marginTop: "1rem", color: "#666", fontSize: "0.9rem" }}>
+        <p style={{ marginTop: "1rem", color: "#94a3b8", fontSize: "0.9rem" }}>
           Showing {events.length} event{events.length !== 1 ? "s" : ""}
         </p>
       </div>
@@ -262,10 +271,11 @@ function BrowseEvents() {
         <div style={{ 
           textAlign: "center", 
           padding: "3rem", 
-          background: "#f9f9f9", 
-          borderRadius: "8px" 
+          background: "white", 
+          borderRadius: "16px",
+          border: "1px solid #e2e8f0"
         }}>
-          <p style={{ color: "#666", fontSize: "1.1rem" }}>
+          <p style={{ color: "#94a3b8", fontSize: "1.1rem" }}>
             No events found matching your criteria
           </p>
         </div>
@@ -278,19 +288,24 @@ function BrowseEvents() {
           {events.map((event) => {
             const isDeadlinePassed = new Date(event.registrationDeadline) < new Date();
             const isCapacityFull = event.registeredCount >= event.capacity;
-            const canRegister = !isDeadlinePassed && !isCapacityFull;
+            const isIneligible = event.eligibility && (
+              (event.eligibility.toLowerCase().includes("iiit") && !event.eligibility.toLowerCase().includes("non") && user?.userType !== "iiit-participant") ||
+              (event.eligibility.toLowerCase().includes("non-iiit") && user?.userType !== "non-iiit-participant")
+            );
+            const canRegister = !isDeadlinePassed && !isCapacityFull && !isIneligible;
 
             return (
               <div
                 key={event._id}
                 style={{
                   padding: "1.5rem",
-                  border: "1px solid #ddd",
-                  borderRadius: "8px",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: "16px",
                   background: "white",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  boxShadow: "0 4px 12px rgba(99,102,241,0.06)",
                   display: "flex",
-                  flexDirection: "column"
+                  flexDirection: "column",
+                  transition: "box-shadow 0.2s, transform 0.2s"
                 }}
               >
                 <div style={{ marginBottom: "1rem" }}>
@@ -298,9 +313,10 @@ function BrowseEvents() {
                     to={`/events/${event._id}`}
                     style={{ 
                       textDecoration: "none", 
-                      color: "#007bff",
-                      fontSize: "1.3rem",
-                      fontWeight: "bold"
+                      color: "#6366f1",
+                      fontSize: "1.2rem",
+                      fontWeight: "700",
+                      letterSpacing: "-0.01em"
                     }}
                   >
                     {event.title}
@@ -310,18 +326,18 @@ function BrowseEvents() {
                 <span style={{ 
                   display: "inline-block",
                   padding: "0.25rem 0.75rem", 
-                  background: event.eventType === "normal" ? "#28a745" : "#ff9800",
+                  background: event.eventType === "normal" ? "#10b981" : "#f59e0b",
                   color: "white",
-                  borderRadius: "12px",
+                  borderRadius: "20px",
                   fontSize: "0.75rem",
-                  fontWeight: "bold",
+                  fontWeight: "600",
                   marginBottom: "1rem",
                   width: "fit-content"
                 }}>
                   {event.eventType === "normal" ? "Normal Event" : "Merchandise"}
                 </span>
 
-                <p style={{ color: "#666", fontSize: "0.95rem", marginBottom: "1rem", flexGrow: 1 }}>
+                <p style={{ color: "#64748b", fontSize: "0.93rem", marginBottom: "1rem", flexGrow: 1, lineHeight: "1.6" }}>
                   {event.description.length > 150 
                     ? event.description.substring(0, 150) + "..." 
                     : event.description}
@@ -340,7 +356,7 @@ function BrowseEvents() {
                     {event.tags.slice(0, 3).map(tag => (
                       <span key={tag} style={{ 
                         display: "inline-block", 
-                        background: "#e0e0e0", 
+                        background: "#e2e8f0", 
                         padding: "0.2rem 0.5rem", 
                         borderRadius: "3px", 
                         marginRight: "0.4rem",
@@ -354,12 +370,12 @@ function BrowseEvents() {
 
                 {!canRegister && (
                   <p style={{ 
-                    color: "#dc3545", 
-                    fontWeight: "bold", 
-                    fontSize: "0.9rem",
+                    color: "#ef4444", 
+                    fontWeight: "600", 
+                    fontSize: "0.88rem",
                     marginBottom: "0.5rem"
                   }}>
-                    {isDeadlinePassed ? "⏰ Registration closed" : "👥 Event full"}
+                    {isDeadlinePassed ? "⏰ Registration closed" : isCapacityFull ? "👥 Event full" : isIneligible ? "🚫 Not eligible for this event" : ""}
                   </p>
                 )}
 
@@ -368,13 +384,16 @@ function BrowseEvents() {
                   disabled={!canRegister}
                   style={{
                     width: "100%",
-                    padding: "0.75rem",
-                    background: canRegister ? "#007bff" : "#ccc",
-                    color: "white",
+                    padding: "0.7rem",
+                    background: canRegister ? "linear-gradient(135deg, #6366f1, #818cf8)" : "#e2e8f0",
+                    color: canRegister ? "white" : "#94a3b8",
                     border: "none",
-                    borderRadius: "4px",
+                    borderRadius: "10px",
                     cursor: canRegister ? "pointer" : "not-allowed",
-                    fontWeight: "bold"
+                    fontWeight: "600",
+                    fontSize: "0.9rem",
+                    boxShadow: canRegister ? "0 4px 12px rgba(99,102,241,0.25)" : "none",
+                    transition: "all 0.15s"
                   }}
                 >
                   {canRegister ? "Register Now" : "Registration Unavailable"}
@@ -401,17 +420,18 @@ function BrowseEvents() {
           <div style={{
             background: "white",
             padding: "2rem",
-            borderRadius: "8px",
+            borderRadius: "20px",
             maxWidth: "500px",
             width: "90%",
             maxHeight: "80vh",
             overflowY: "auto",
+            boxShadow: "0 20px 50px rgba(0,0,0,0.15)",
           }}>
             <h2>Register for {selectedEvent.title}</h2>
             
             {selectedEvent.eventType === "normal" && selectedEvent.customForm && selectedEvent.customForm.length > 0 ? (
               <div>
-                <p style={{ marginBottom: "1rem", color: "#666" }}>
+                <p style={{ marginBottom: "1rem", color: "#64748b" }}>
                   Please fill in the following information:
                 </p>
                 
@@ -519,13 +539,14 @@ function BrowseEvents() {
                 onClick={handleRegister}
                 style={{
                   flex: 1,
-                  background: "#4CAF50",
+                  background: "linear-gradient(135deg, #10b981, #34d399)",
                   color: "white",
                   padding: "0.75rem",
                   border: "none",
-                  borderRadius: "4px",
+                  borderRadius: "10px",
                   fontSize: "1rem",
                   cursor: "pointer",
+                  fontWeight: "600",
                 }}
               >
                 Confirm Registration
@@ -534,13 +555,14 @@ function BrowseEvents() {
                 onClick={closeModal}
                 style={{
                   flex: 1,
-                  background: "#f44336",
-                  color: "white",
+                  background: "white",
+                  color: "#64748b",
                   padding: "0.75rem",
-                  border: "none",
-                  borderRadius: "4px",
+                  border: "1.5px solid #e2e8f0",
+                  borderRadius: "10px",
                   fontSize: "1rem",
                   cursor: "pointer",
+                  fontWeight: "600",
                 }}
               >
                 Cancel

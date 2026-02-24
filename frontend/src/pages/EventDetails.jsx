@@ -28,7 +28,18 @@ function EventDetails() {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/events/public/${id}`);
+        const role = localStorage.getItem("role");
+        const token = localStorage.getItem("token");
+        const isOrganizer = role === "organizer";
+        const endpoint = isOrganizer
+          ? `${import.meta.env.VITE_API_URL}/api/events/${id}`
+          : `${import.meta.env.VITE_API_URL}/api/events/public/${id}`;
+
+        const res = await fetch(endpoint, isOrganizer ? {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        } : undefined);
         const data = await res.json();
 
         if (!res.ok) throw new Error(data.message);
@@ -107,10 +118,12 @@ function EventDetails() {
         return;
       }
       const data = await res.json();
-      setMessages(data);
+      const nextMessages = Array.isArray(data) ? data : data?.messages;
+      setMessages(Array.isArray(nextMessages) ? nextMessages : []);
       setDiscussionError("");
     } catch (err) {
       setDiscussionError(err.message);
+      setMessages([]);
     }
   }, [id]);
 
@@ -123,7 +136,7 @@ function EventDetails() {
       });
       if (res.ok) {
         const data = await res.json();
-        setUnreadCount(data.unreadCount);
+        setUnreadCount(data.unreadCount ?? data.count ?? 0);
       }
     } catch {}
   }, [id]);
@@ -205,28 +218,33 @@ function EventDetails() {
     } catch {}
   };
 
-  const isEventOrganizer = user && user.role === "organizer" && event && event.organizer &&
-    (event.organizer._id === user.userId || event.organizer === user.userId);
+  const createdById = event?.createdBy?._id || event?.createdBy;
+  const organizerId = event?.organizer?._id || event?.organizer;
+  const eventOwnerId = createdById || organizerId;
+  const isEventOrganizer =
+    user?.role === "organizer" &&
+    !!eventOwnerId &&
+    eventOwnerId.toString() === user.userId;
 
-  const renderMessage = (msg, isReply = false) => (
+  const renderMessage = (msg, depth = 0) => (
     <div key={msg._id} style={{
       padding: "0.75rem",
-      marginBottom: isReply ? "0.5rem" : "0.75rem",
-      marginLeft: isReply ? "2rem" : 0,
-      background: msg.isAnnouncement ? "#fff3cd" : msg.isPinned ? "#e8f4f8" : "#f8f9fa",
-      borderRadius: "6px",
-      borderLeft: msg.isAnnouncement ? "4px solid #ffc107" : msg.isPinned ? "4px solid #17a2b8" : "none",
+      marginBottom: depth > 0 ? "0.5rem" : "0.75rem",
+      marginLeft: depth > 0 ? `${Math.min(depth * 1.25, 4)}rem` : 0,
+      background: msg.isAnnouncement ? "#fefce8" : msg.isPinned ? "#ecfeff" : "#f8f9fc",
+      borderRadius: "10px",
+      borderLeft: msg.isAnnouncement ? "4px solid #f59e0b" : msg.isPinned ? "4px solid #06b6d4" : "none",
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.3rem" }}>
         <div>
           <strong style={{ fontSize: "0.9rem" }}>{msg.author?.email || "Unknown"}</strong>
-          {msg.isAnnouncement && <span style={{ marginLeft: "0.5rem", background: "#ffc107", color: "#333", padding: "0.1rem 0.4rem", borderRadius: "10px", fontSize: "0.7rem", fontWeight: "bold" }}>ANNOUNCEMENT</span>}
-          {msg.isPinned && <span style={{ marginLeft: "0.5rem", color: "#17a2b8", fontSize: "0.75rem" }}>📌 Pinned</span>}
+          {msg.isAnnouncement && <span style={{ marginLeft: "0.5rem", background: "#f59e0b", color: "white", padding: "0.1rem 0.4rem", borderRadius: "10px", fontSize: "0.7rem", fontWeight: "bold" }}>ANNOUNCEMENT</span>}
+          {msg.isPinned && <span style={{ marginLeft: "0.5rem", color: "#06b6d4", fontSize: "0.75rem" }}>📌 Pinned</span>}
         </div>
-        <span style={{ fontSize: "0.75rem", color: "#999" }}>{new Date(msg.createdAt).toLocaleString()}</span>
+        <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>{new Date(msg.createdAt).toLocaleString()}</span>
       </div>
 
-      <p style={{ margin: "0.3rem 0", color: msg.isDeleted ? "#999" : "#333", fontStyle: msg.isDeleted ? "italic" : "normal" }}>{msg.content}</p>
+      <p style={{ margin: "0.3rem 0", color: msg.isDeleted ? "#94a3b8" : "#1e293b", fontStyle: msg.isDeleted ? "italic" : "normal" }}>{msg.content}</p>
 
       {!msg.isDeleted && (
         <div style={{ display: "flex", gap: "0.3rem", flexWrap: "wrap", alignItems: "center", marginTop: "0.4rem" }}>
@@ -235,32 +253,30 @@ function EventDetails() {
             const userReacted = msg.reactions?.some(r => r.emoji === emoji && r.user === user?.userId);
             return (
               <button key={emoji} onClick={() => handleReact(msg._id, emoji)} style={{
-                padding: "0.15rem 0.4rem", border: userReacted ? "2px solid #007bff" : "1px solid #ddd",
-                borderRadius: "12px", background: userReacted ? "#e7f1ff" : "white", cursor: "pointer", fontSize: "0.8rem",
+                padding: "0.15rem 0.4rem", border: userReacted ? "2px solid #6366f1" : "1px solid #e2e8f0",
+                borderRadius: "12px", background: userReacted ? "#eef2ff" : "white", cursor: "pointer", fontSize: "0.8rem",
               }}>
                 {emoji}{count > 0 && ` ${count}`}
               </button>
             );
           })}
 
-          {!isReply && (
-            <button onClick={() => setReplyTo(msg._id)} style={{
-              padding: "0.15rem 0.5rem", border: "1px solid #ddd", borderRadius: "12px",
-              background: "white", cursor: "pointer", fontSize: "0.75rem", color: "#666",
-            }}>↩ Reply</button>
-          )}
+          <button onClick={() => setReplyTo(msg._id)} style={{
+            padding: "0.15rem 0.5rem", border: "1px solid #e2e8f0", borderRadius: "12px",
+            background: "white", cursor: "pointer", fontSize: "0.75rem", color: "#64748b",
+          }}>↩ Reply</button>
 
           {(user?.userId === msg.author?._id || isEventOrganizer) && (
             <button onClick={() => handleDeleteMessage(msg._id)} style={{
-              padding: "0.15rem 0.5rem", border: "1px solid #dc3545", borderRadius: "12px",
-              background: "white", cursor: "pointer", fontSize: "0.75rem", color: "#dc3545",
+              padding: "0.15rem 0.5rem", border: "1px solid #ef4444", borderRadius: "12px",
+              background: "white", cursor: "pointer", fontSize: "0.75rem", color: "#ef4444",
             }}>🗑</button>
           )}
 
-          {isEventOrganizer && !isReply && (
+          {isEventOrganizer && depth === 0 && (
             <button onClick={() => handlePinMessage(msg._id)} style={{
-              padding: "0.15rem 0.5rem", border: "1px solid #17a2b8", borderRadius: "12px",
-              background: "white", cursor: "pointer", fontSize: "0.75rem", color: "#17a2b8",
+              padding: "0.15rem 0.5rem", border: "1px solid #06b6d4", borderRadius: "12px",
+              background: "white", cursor: "pointer", fontSize: "0.75rem", color: "#06b6d4",
             }}>{msg.isPinned ? "Unpin" : "📌 Pin"}</button>
           )}
         </div>
@@ -268,20 +284,24 @@ function EventDetails() {
 
       {msg.replies && msg.replies.length > 0 && (
         <div style={{ marginTop: "0.5rem" }}>
-          {msg.replies.map(reply => renderMessage(reply, true))}
+          {msg.replies.map(reply => renderMessage(reply, depth + 1))}
         </div>
       )}
     </div>
   );
 
-  if (loading) return <h2 style={{ padding: "2rem" }}>Loading event details...</h2>;
-  if (error) return <div style={{ padding: "2rem" }}><p style={{ color: "red" }}>{error}</p></div>;
+  if (loading) return <h2 style={{ padding: "2rem", textAlign: "center", color: "#64748b" }}>Loading event details...</h2>;
+  if (error) return <div style={{ padding: "2rem" }}><p style={{ color: "#ef4444", background: "#fef2f2", padding: "0.75rem 1rem", borderRadius: "10px" }}>{error}</p></div>;
   if (!event) return <div style={{ padding: "2rem" }}><p>Event not found</p></div>;
 
   const isDeadlinePassed = new Date(event.registrationDeadline) < new Date();
   const isCapacityFull = event.registeredCount >= event.capacity;
   const isStockExhausted = event.eventType === "merchandise" && event.merchandiseDetails?.stockQuantity <= 0;
-  const canRegister = !isDeadlinePassed && !isCapacityFull && !isStockExhausted;
+  const isIneligible = event.eligibility && (
+    (event.eligibility.toLowerCase().includes("iiit") && !event.eligibility.toLowerCase().includes("non") && user?.userType !== "iiit-participant") ||
+    (event.eligibility.toLowerCase().includes("non-iiit") && user?.userType !== "non-iiit-participant")
+  );
+  const canRegister = !isDeadlinePassed && !isCapacityFull && !isStockExhausted && !isIneligible;
 
   return (
     <div style={{ padding: "2rem", maxWidth: "900px", margin: "0 auto" }}>
@@ -290,11 +310,13 @@ function EventDetails() {
         style={{
           marginBottom: "1rem",
           padding: "0.5rem 1rem",
-          background: "#6c757d",
-          color: "white",
-          border: "none",
-          borderRadius: "4px",
-          cursor: "pointer"
+          background: "#f1f5f9",
+          color: "#475569",
+          border: "1.5px solid #e2e8f0",
+          borderRadius: "10px",
+          cursor: "pointer",
+          fontWeight: "600",
+          fontSize: "0.9rem"
         }}
       >
         ← Back to Events
@@ -303,9 +325,9 @@ function EventDetails() {
       {message && (
         <div style={{ 
           padding: "1rem", 
-          background: message.includes("success") ? "#d4edda" : "#f8d7da", 
-          color: message.includes("success") ? "#155724" : "#721c24", 
-          borderRadius: "4px", 
+          background: message.includes("success") ? "#ecfdf5" : "#fef2f2", 
+          color: message.includes("success") ? "#065f46" : "#ef4444", 
+          borderRadius: "10px", 
           marginBottom: "1rem" 
         }}>
           {message}
@@ -313,11 +335,11 @@ function EventDetails() {
       )}
 
       <div style={{ 
-        border: "1px solid #ddd", 
-        borderRadius: "8px", 
+        border: "1px solid #e2e8f0", 
+        borderRadius: "20px", 
         padding: "2rem",
         background: "white",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+        boxShadow: "0 4px 20px rgba(99,102,241,0.08)"
       }}>
         <h1 style={{ marginTop: 0 }}>{event.title}</h1>
         
@@ -325,11 +347,11 @@ function EventDetails() {
           <span style={{ 
             display: "inline-block",
             padding: "0.4rem 1rem", 
-            background: event.eventType === "normal" ? "#28a745" : "#ff9800",
+            background: event.eventType === "normal" ? "#10b981" : "#f59e0b",
             color: "white",
-            borderRadius: "15px",
-            fontSize: "0.9rem",
-            fontWeight: "bold"
+            borderRadius: "20px",
+            fontSize: "0.85rem",
+            fontWeight: "600"
           }}>
             {event.eventType === "normal" ? "Normal Event" : "Merchandise Event"}
           </span>
@@ -337,8 +359,8 @@ function EventDetails() {
 
         <div style={{ 
           padding: "1rem", 
-          background: "#f8f9fa", 
-          borderRadius: "8px",
+          background: "#f8fafc", 
+          borderRadius: "12px",
           marginBottom: "1.5rem"
         }}>
           <p style={{ margin: "0.5rem 0", fontSize: "1rem" }}>
@@ -363,7 +385,7 @@ function EventDetails() {
 
         <div style={{ marginBottom: "1.5rem" }}>
           <h3>Description</h3>
-          <p style={{ lineHeight: "1.8", color: "#333" }}>{event.description}</p>
+          <p style={{ lineHeight: "1.8", color: "#1e293b" }}>{event.description}</p>
         </div>
 
         {event.tags && event.tags.length > 0 && (
@@ -373,7 +395,7 @@ function EventDetails() {
               {event.tags.map(tag => (
                 <span key={tag} style={{ 
                   display: "inline-block", 
-                  background: "#e0e0e0", 
+                  background: "#e2e8f0", 
                   padding: "0.3rem 0.7rem", 
                   borderRadius: "15px", 
                   marginRight: "0.5rem",
@@ -388,9 +410,9 @@ function EventDetails() {
         )}
 
         {event.eventType === "normal" && event.customForm && event.customForm.length > 0 && (
-          <div style={{ marginBottom: "1.5rem", padding: "1rem", background: "#e3f2fd", borderRadius: "8px" }}>
+          <div style={{ marginBottom: "1.5rem", padding: "1rem", background: "#eef2ff", borderRadius: "12px" }}>
             <h4>Additional Information Required</h4>
-            <p style={{ color: "#666" }}>
+            <p style={{ color: "#64748b" }}>
               This event requires you to fill in {event.customForm.length} additional field(s) during registration.
             </p>
           </div>
@@ -399,8 +421,8 @@ function EventDetails() {
         {event.eventType === "merchandise" && event.merchandiseDetails && (
           <div style={{ 
             padding: "1rem", 
-            background: "#fff3cd", 
-            borderRadius: "8px",
+            background: "#fefce8", 
+            borderRadius: "12px",
             marginBottom: "1.5rem"
           }}>
             <h3>Merchandise Details</h3>
@@ -420,19 +442,20 @@ function EventDetails() {
 
         <div style={{ 
           padding: "1rem", 
-          background: canRegister ? "#d1ecf1" : "#f8d7da", 
-          borderRadius: "8px",
+          background: canRegister ? "#ecfdf5" : "#fef2f2", 
+          borderRadius: "12px",
           marginBottom: "1.5rem"
         }}>
           {canRegister ? (
-            <p style={{ margin: 0, color: "#0c5460", fontWeight: "bold" }}>
+            <p style={{ margin: 0, color: "#065f46", fontWeight: "600" }}>
               ✓ Registration is open! Click below to register.
             </p>
           ) : (
-            <p style={{ margin: 0, color: "#721c24", fontWeight: "bold" }}>
+            <p style={{ margin: 0, color: "#991b1b", fontWeight: "600" }}>
               {isDeadlinePassed && "⏰ Registration deadline has passed"}
               {isCapacityFull && "👥 Event is at full capacity"}
               {isStockExhausted && "📦 Merchandise is out of stock"}
+              {isIneligible && "🚫 You are not eligible for this event"}
             </p>
           )}
         </div>
@@ -443,13 +466,15 @@ function EventDetails() {
           style={{
             width: "100%",
             padding: " 1rem",
-            background: canRegister ? "#007bff" : "#ccc",
-            color: "white",
+            background: canRegister ? "linear-gradient(135deg, #6366f1, #818cf8)" : "#e2e8f0",
+            color: canRegister ? "white" : "#94a3b8",
             border: "none",
-            borderRadius: "8px",
-            fontSize: "1.1rem",
-            fontWeight: "bold",
-            cursor: canRegister ? "pointer" : "not-allowed"
+            borderRadius: "12px",
+            fontSize: "1.05rem",
+            fontWeight: "600",
+            cursor: canRegister ? "pointer" : "not-allowed",
+            boxShadow: canRegister ? "0 4px 16px rgba(99,102,241,0.3)" : "none",
+            transition: "all 0.2s"
           }}
         >
           {canRegister ? "Register for this Event" : "Registration Closed"}
@@ -472,17 +497,18 @@ function EventDetails() {
           <div style={{
             background: "white",
             padding: "2rem",
-            borderRadius: "8px",
+            borderRadius: "20px",
             maxWidth: "500px",
             width: "90%",
             maxHeight: "80vh",
             overflowY: "auto",
+            boxShadow: "0 20px 50px rgba(0,0,0,0.15)",
           }}>
             <h2>Register for {event.title}</h2>
             
             {event.eventType === "merchandise" && (
               <div style={{ marginBottom: "1.5rem" }}>
-                <div style={{ background: "#fff3cd", padding: "0.75rem", borderRadius: "6px", marginBottom: "1rem", fontSize: "0.9rem", color: "#856404" }}>
+                <div style={{ background: "#fefce8", padding: "0.75rem", borderRadius: "10px", marginBottom: "1rem", fontSize: "0.9rem", color: "#92400e" }}>
                   Registration = Payment. Upload proof to proceed.
                 </div>
 
@@ -520,7 +546,7 @@ function EventDetails() {
                   <label style={{ display: "block", marginBottom: "0.3rem", fontWeight: "bold" }}>
                     Payment Proof <span style={{ color: "red" }}>*</span>
                   </label>
-                  <p style={{ fontSize: "0.8rem", color: "#666", margin: "0 0 0.3rem 0" }}>
+                  <p style={{ fontSize: "0.8rem", color: "#64748b", margin: "0 0 0.3rem 0" }}>
                     Enter payment screenshot URL or transaction ID
                   </p>
                   <input
@@ -528,7 +554,7 @@ function EventDetails() {
                     value={paymentProof}
                     onChange={e => setPaymentProof(e.target.value)}
                     placeholder="e.g. https://imgur.com/abc123 or TXN-12345"
-                    style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ddd" }}
+                    style={{ width: "100%", padding: "0.5rem", borderRadius: "10px", border: "1px solid #e2e8f0" }}
                   />
                 </div>
               </div>
@@ -536,7 +562,7 @@ function EventDetails() {
 
             {event.eventType === "normal" && event.customForm && event.customForm.length > 0 ? (
               <div>
-                <p style={{ marginBottom: "1rem", color: "#666" }}>
+                <p style={{ marginBottom: "1rem", color: "#64748b" }}>
                   Please fill in the following information:
                 </p>
                 
@@ -644,13 +670,14 @@ function EventDetails() {
                 onClick={handleRegister}
                 style={{
                   flex: 1,
-                  background: "#4CAF50",
+                  background: "linear-gradient(135deg, #10b981, #34d399)",
                   color: "white",
                   padding: "0.75rem",
                   border: "none",
-                  borderRadius: "4px",
+                  borderRadius: "10px",
                   fontSize: "1rem",
                   cursor: "pointer",
+                  fontWeight: "600",
                 }}
               >
                 Confirm Registration
@@ -659,13 +686,14 @@ function EventDetails() {
                 onClick={() => setShowModal(false)}
                 style={{
                   flex: 1,
-                  background: "#f44336",
-                  color: "white",
+                  background: "white",
+                  color: "#64748b",
                   padding: "0.75rem",
-                  border: "none",
-                  borderRadius: "4px",
+                  border: "1.5px solid #e2e8f0",
+                  borderRadius: "10px",
                   fontSize: "1rem",
                   cursor: "pointer",
+                  fontWeight: "600",
                 }}
               >
                 Cancel
@@ -676,18 +704,18 @@ function EventDetails() {
       )}
 
       {user && (user.role === "participant" || user.role === "organizer") && (
-        <div style={{ marginTop: "2rem", border: "1px solid #ddd", borderRadius: "8px", padding: "1.5rem", background: "white" }}>
+        <div style={{ marginTop: "2rem", border: "1px solid #e2e8f0", borderRadius: "16px", padding: "1.5rem", background: "white", boxShadow: "0 4px 12px rgba(99,102,241,0.06)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
             <h2 style={{ margin: 0 }}>💬 Discussion Forum</h2>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
               {unreadCount > 0 && !showDiscussion && (
-                <span style={{ background: "#dc3545", color: "white", padding: "0.2rem 0.6rem", borderRadius: "12px", fontSize: "0.8rem", fontWeight: "bold" }}>
+                <span style={{ background: "#ef4444", color: "white", padding: "0.2rem 0.6rem", borderRadius: "12px", fontSize: "0.8rem", fontWeight: "bold" }}>
                   {unreadCount} new
                 </span>
               )}
               <button onClick={() => setShowDiscussion(!showDiscussion)} style={{
-                padding: "0.5rem 1rem", background: showDiscussion ? "#6c757d" : "#007bff",
-                color: "white", border: "none", borderRadius: "4px", cursor: "pointer",
+                padding: "0.5rem 1rem", background: showDiscussion ? "#64748b" : "linear-gradient(135deg, #6366f1, #818cf8)",
+                color: "white", border: "none", borderRadius: "10px", cursor: "pointer", fontWeight: "600", fontSize: "0.9rem",
               }}>
                 {showDiscussion ? "Hide Discussion" : "Show Discussion"}
               </button>
@@ -697,20 +725,20 @@ function EventDetails() {
           {showDiscussion && (
             <div>
               {discussionError && (
-                <div style={{ padding: "0.75rem", background: "#f8d7da", color: "#721c24", borderRadius: "4px", marginBottom: "1rem" }}>
+                <div style={{ padding: "0.75rem", background: "#fef2f2", color: "#ef4444", borderRadius: "10px", marginBottom: "1rem" }}>
                   {discussionError}
                 </div>
               )}
 
-              <div style={{ padding: "1rem", background: "#f0f0f0", borderRadius: "6px", marginBottom: "1rem" }}>
+              <div style={{ padding: "1rem", background: "#f1f5f9", borderRadius: "12px", marginBottom: "1rem" }}>
                 {replyTo && (
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem", padding: "0.4rem 0.6rem", background: "#e0e0e0", borderRadius: "4px", fontSize: "0.85rem" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem", padding: "0.4rem 0.6rem", background: "#e2e8f0", borderRadius: "8px", fontSize: "0.85rem" }}>
                     <span>↩ Replying to a message</span>
-                    <button onClick={() => setReplyTo(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#dc3545", fontWeight: "bold" }}>✕</button>
+                    <button onClick={() => setReplyTo(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#ef4444", fontWeight: "bold" }}>✕</button>
                   </div>
                 )}
                 <textarea value={newMessage} onChange={e => setNewMessage(e.target.value)} placeholder="Write a message..."
-                  rows="3" style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ddd", resize: "vertical", boxSizing: "border-box" }}
+                  rows="3" style={{ width: "100%", padding: "0.5rem", borderRadius: "10px", border: "1px solid #e2e8f0", resize: "vertical", boxSizing: "border-box" }}
                 />
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.5rem" }}>
                   <div>
@@ -722,8 +750,8 @@ function EventDetails() {
                     )}
                   </div>
                   <button onClick={handlePostMessage} disabled={!newMessage.trim()} style={{
-                    padding: "0.5rem 1.5rem", background: newMessage.trim() ? "#28a745" : "#ccc",
-                    color: "white", border: "none", borderRadius: "4px", cursor: newMessage.trim() ? "pointer" : "not-allowed",
+                    padding: "0.5rem 1.5rem", background: newMessage.trim() ? "#10b981" : "#cbd5e1",
+                    color: "white", border: "none", borderRadius: "10px", cursor: newMessage.trim() ? "pointer" : "not-allowed",
                   }}>
                     {replyTo ? "Reply" : isAnnouncement ? "Post Announcement" : "Post Message"}
                   </button>
@@ -732,7 +760,7 @@ function EventDetails() {
 
               <div style={{ maxHeight: "500px", overflowY: "auto" }}>
                 {messages.length === 0 ? (
-                  <p style={{ textAlign: "center", color: "#999", padding: "2rem" }}>No messages yet. Start the discussion!</p>
+                  <p style={{ textAlign: "center", color: "#94a3b8", padding: "2rem" }}>No messages yet. Start the discussion!</p>
                 ) : (
                   messages.map(msg => renderMessage(msg))
                 )}

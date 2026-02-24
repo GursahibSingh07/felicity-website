@@ -1,6 +1,7 @@
 const Registration = require("../models/Registration");
 const Event = require("../models/Event");
 const QRCode = require("qrcode");
+const { sendTicketEmail } = require("../utils/emailService");
 
 exports.getMyRegisteredEvents = async (req, res) => {
   try {
@@ -53,6 +54,7 @@ exports.unregisterFromEvent = async (req, res) => {
     }
 
     await registration.deleteOne();
+    await Event.findByIdAndUpdate(req.params.eventId, { $inc: { registeredCount: -1 } });
     res.status(200).json({ message: "Unregistered successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -135,7 +137,7 @@ exports.getPendingPayments = async (req, res) => {
 
 exports.approvePayment = async (req, res) => {
   try {
-    const registration = await Registration.findById(req.params.registrationId).populate("event");
+    const registration = await Registration.findById(req.params.registrationId).populate("event user");
     if (!registration)
       return res.status(404).json({ message: "Registration not found" });
 
@@ -152,12 +154,21 @@ exports.approvePayment = async (req, res) => {
     registration.paymentStatus = "approved";
     await registration.save();
 
-    if (event.merchandiseDetails && event.merchandiseDetails.stockQuantity > 0) {
-      const qty = registration.merchandiseSelections?.quantity || 1;
-      await Event.findByIdAndUpdate(event._id, {
-        $inc: { "merchandiseDetails.stockQuantity": -qty },
+    const qrCode = await QRCode.toDataURL(registration.ticketId);
+
+    try {
+      const participantName = `${registration.user?.firstName || ""} ${registration.user?.lastName || ""}`.trim() || registration.user?.email;
+      await sendTicketEmail({
+        to: registration.user?.email,
+        participantName,
+        eventTitle: event.title,
+        eventType: event.eventType,
+        ticketId: registration.ticketId,
+        eventDate: event.date,
+        location: event.location,
+        qrCode,
       });
-    }
+    } catch (_) {}
 
     res.status(200).json({
       message: "Payment approved successfully",

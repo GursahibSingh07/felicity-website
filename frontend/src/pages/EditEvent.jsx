@@ -163,54 +163,55 @@ function EditEvent() {
 
   const inputStyle = (name) => ({
     padding: "0.6rem",
-    border: "1px solid #ddd",
-    borderRadius: "6px",
+    border: "1.5px solid #e2e8f0",
+    borderRadius: "10px",
     fontSize: "0.95rem",
     width: "100%",
     boxSizing: "border-box",
-    background: fieldReadonly(name) ? "#f4f4f4" : "white",
+    background: fieldReadonly(name) ? "#f1f5f9" : "white",
     cursor: fieldReadonly(name) ? "not-allowed" : "text",
+    transition: "border-color 0.2s",
   });
 
   if (loading) return <h2 style={{ padding: "2rem" }}>Loading...</h2>;
 
   return (
     <div style={{ padding: "2rem", maxWidth: "700px", margin: "0 auto" }}>
-      <button onClick={() => navigate("/organizer/dashboard")} style={{ background: "none", border: "1px solid #ccc", padding: "0.4rem 1rem", borderRadius: "6px", cursor: "pointer", marginBottom: "1.5rem", fontSize: "0.9rem" }}>
+      <button onClick={() => navigate("/organizer/dashboard")} style={{ background: "#f8fafc", border: "1.5px solid #e2e8f0", padding: "0.4rem 1rem", borderRadius: "10px", cursor: "pointer", marginBottom: "1.5rem", fontSize: "0.9rem", color: "#475569", fontWeight: "500" }}>
         ← Back
       </button>
 
       <h1 style={{ marginBottom: "0.25rem" }}>Edit Event</h1>
-      <p style={{ color: "#666", marginTop: 0, fontSize: "0.9rem" }}>
+      <p style={{ color: "#64748b", marginTop: 0, fontSize: "0.9rem" }}>
         Status: <strong style={{ textTransform: "capitalize" }}>{event?.status}</strong>
         {isLocked && " — This event is locked. No edits allowed."}
         {isPublished && " — Limited edits: description, deadline extension, capacity increase only."}
         {hasRegistrations && isDraft && " — Custom form locked (registrations exist)."}
       </p>
 
-      {error && <p style={{ color: "red", background: "#fee", padding: "0.75rem", borderRadius: "6px" }}>{error}</p>}
+      {error && <p style={{ color: "#ef4444", background: "#fef2f2", padding: "0.75rem", borderRadius: "10px", border: "1px solid #fecaca" }}>{error}</p>}
 
       {isLocked ? (
-        <div style={{ background: "#f9f9f9", border: "1px solid #ddd", borderRadius: "8px", padding: "1.5rem" }}>
-          <p style={{ color: "#666" }}>This event cannot be edited in its current status (<strong>{event?.status}</strong>).</p>
-          <button onClick={() => navigate("/organizer/dashboard")} style={{ background: "#007bff", color: "white", border: "none", padding: "0.6rem 1.4rem", borderRadius: "6px", cursor: "pointer", fontWeight: "bold" }}>
+        <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "16px", padding: "1.5rem" }}>
+          <p style={{ color: "#64748b" }}>This event cannot be edited in its current status (<strong>{event?.status}</strong>).</p>
+          <button onClick={() => navigate("/organizer/dashboard")} style={{ background: "linear-gradient(135deg, #6366f1, #818cf8)", color: "white", border: "none", padding: "0.6rem 1.4rem", borderRadius: "10px", cursor: "pointer", fontWeight: "600", boxShadow: "0 4px 12px rgba(99,102,241,0.25)" }}>
             Go to Dashboard
           </button>
         </div>
       ) : (
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           <div style={{ opacity: isPublished ? 0.5 : 1 }}>
-            <label style={{ fontSize: "0.85rem", color: "#555" }}>Event Title {isPublished && "(locked)"}</label>
+            <label style={{ fontSize: "0.85rem", color: "#475569" }}>Event Title {isPublished && "(locked)"}</label>
             <input name="title" value={formData.title} onChange={handleChange} readOnly={!!isPublished} required style={inputStyle("title")} />
           </div>
 
           <div>
-            <label style={{ fontSize: "0.85rem", color: "#555" }}>Description</label>
+            <label style={{ fontSize: "0.85rem", color: "#475569" }}>Description</label>
             <textarea name="description" value={formData.description} onChange={handleChange} rows="4" style={{ ...inputStyle("description"), resize: "vertical" }} />
           </div>
 
           <div style={{ opacity: isPublished ? 0.5 : 1 }}>
-            <label style={{ fontSize: "0.85rem", color: "#555" }}>Event Type {isPublished && "(locked)"}</label>
+            <label style={{ fontSize: "0.85rem", color: "#475569" }}>Event Type {isPublished && "(locked)"}</label>
             <select name="eventType" value={formData.eventType} onChange={handleChange} disabled={!!isPublished} style={inputStyle("eventType")}>
               <option value="normal">Normal Event</option>
               <option value="merchandise">Merchandise Event</option>
@@ -218,65 +219,65 @@ function EditEvent() {
           </div>
 
           <div style={{ opacity: isPublished ? 0.5 : 1 }}>
-            <label style={{ fontSize: "0.85rem", color: "#555" }}>Start Date {isPublished && "(locked)"}</label>
+            <label style={{ fontSize: "0.85rem", color: "#475569" }}>Start Date {isPublished && "(locked)"}</label>
             <input type="date" name="date" value={formData.date} onChange={handleChange} readOnly={!!isPublished} required style={inputStyle("date")} />
           </div>
 
           <div style={{ opacity: isPublished ? 0.5 : 1 }}>
-            <label style={{ fontSize: "0.85rem", color: "#555" }}>End Date {isPublished && "(locked)"}</label>
+            <label style={{ fontSize: "0.85rem", color: "#475569" }}>End Date {isPublished && "(locked)"}</label>
             <input type="date" name="endDate" value={formData.endDate} onChange={handleChange} readOnly={!!isPublished} required style={inputStyle("endDate")} />
           </div>
 
           <div>
-            <label style={{ fontSize: "0.85rem", color: "#555" }}>Registration Deadline</label>
+            <label style={{ fontSize: "0.85rem", color: "#475569" }}>Registration Deadline</label>
             <input type="date" name="registrationDeadline" value={formData.registrationDeadline} onChange={handleChange} required style={inputStyle("registrationDeadline")} />
           </div>
 
           <div style={{ opacity: isPublished ? 0.5 : 1 }}>
-            <label style={{ fontSize: "0.85rem", color: "#555" }}>Location {isPublished && "(locked)"}</label>
+            <label style={{ fontSize: "0.85rem", color: "#475569" }}>Location {isPublished && "(locked)"}</label>
             <input name="location" value={formData.location} onChange={handleChange} readOnly={!!isPublished} required style={inputStyle("location")} />
           </div>
 
           <div style={{ opacity: isPublished ? 0.5 : 1 }}>
-            <label style={{ fontSize: "0.85rem", color: "#555" }}>Eligibility {isPublished && "(locked)"}</label>
+            <label style={{ fontSize: "0.85rem", color: "#475569" }}>Eligibility {isPublished && "(locked)"}</label>
             <input name="eligibility" value={formData.eligibility} onChange={handleChange} readOnly={!!isPublished} style={inputStyle("eligibility")} />
           </div>
 
           <div>
-            <label style={{ fontSize: "0.85rem", color: "#555" }}>Capacity {isPublished && "(can only increase)"}</label>
+            <label style={{ fontSize: "0.85rem", color: "#475569" }}>Capacity {isPublished && "(can only increase)"}</label>
             <input type="number" name="capacity" value={formData.capacity} onChange={handleChange} min={isPublished ? String(formData.capacity) : "1"} required style={inputStyle("capacity")} />
           </div>
 
           <div style={{ opacity: isPublished ? 0.5 : 1 }}>
-            <label style={{ fontSize: "0.85rem", color: "#555" }}>Registration Fee {isPublished && "(locked)"}</label>
+            <label style={{ fontSize: "0.85rem", color: "#475569" }}>Registration Fee {isPublished && "(locked)"}</label>
             <input type="number" name="registrationFee" value={formData.registrationFee} onChange={handleChange} readOnly={!!isPublished} min="0" style={inputStyle("registrationFee")} />
           </div>
 
           <div style={{ opacity: isPublished ? 0.5 : 1 }}>
-            <label style={{ fontSize: "0.85rem", color: "#555" }}>Tags (comma-separated) {isPublished && "(locked)"}</label>
+            <label style={{ fontSize: "0.85rem", color: "#475569" }}>Tags (comma-separated) {isPublished && "(locked)"}</label>
             <input name="tags" value={formData.tags} onChange={handleChange} readOnly={!!isPublished} style={inputStyle("tags")} />
           </div>
 
           {formData.eventType === "normal" && (
-            <div style={{ border: "1px solid #ddd", padding: "1rem", borderRadius: "8px" }}>
+            <div style={{ border: "1.5px solid #e2e8f0", padding: "1rem", borderRadius: "12px", background: "#f8fafc" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
                 <h3 style={{ margin: 0 }}>Custom Registration Form</h3>
                 {hasRegistrations && (
-                  <span style={{ fontSize: "0.8rem", background: "#fff3cd", color: "#856404", padding: "0.2rem 0.6rem", borderRadius: "8px", fontWeight: "bold" }}>
+                  <span style={{ fontSize: "0.8rem", background: "#fef3c7", color: "#92400e", padding: "0.2rem 0.6rem", borderRadius: "20px", fontWeight: "600" }}>
                     Locked (registrations exist)
                   </span>
                 )}
               </div>
               {customForm.map((field, index) => (
-                <div key={index} style={{ marginBottom: "1rem", padding: "1rem", background: "#f9f9f9", borderRadius: "6px", opacity: hasRegistrations ? 0.6 : 1 }}>
+                <div key={index} style={{ marginBottom: "1rem", padding: "1rem", background: "white", borderRadius: "10px", border: "1px solid #e2e8f0", opacity: hasRegistrations ? 0.6 : 1 }}>
                   <div style={{ display: "flex", gap: "0.4rem", justifyContent: "flex-end", marginBottom: "0.5rem" }}>
-                    <button type="button" onClick={() => moveField(index, -1)} disabled={hasRegistrations || index === 0} style={{ padding: "0.2rem 0.5rem", border: "1px solid #ccc", borderRadius: "4px", cursor: "pointer", background: "white" }}>↑</button>
-                    <button type="button" onClick={() => moveField(index, 1)} disabled={hasRegistrations || index === customForm.length - 1} style={{ padding: "0.2rem 0.5rem", border: "1px solid #ccc", borderRadius: "4px", cursor: "pointer", background: "white" }}>↓</button>
-                    <button type="button" onClick={() => removeFormField(index)} disabled={hasRegistrations} style={{ padding: "0.2rem 0.5rem", background: "red", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}>✕</button>
+                    <button type="button" onClick={() => moveField(index, -1)} disabled={hasRegistrations || index === 0} style={{ padding: "0.2rem 0.5rem", border: "1.5px solid #e2e8f0", borderRadius: "6px", cursor: "pointer", background: "white" }}>↑</button>
+                    <button type="button" onClick={() => moveField(index, 1)} disabled={hasRegistrations || index === customForm.length - 1} style={{ padding: "0.2rem 0.5rem", border: "1.5px solid #e2e8f0", borderRadius: "6px", cursor: "pointer", background: "white" }}>↓</button>
+                    <button type="button" onClick={() => removeFormField(index)} disabled={hasRegistrations} style={{ padding: "0.2rem 0.5rem", background: "#ef4444", color: "white", border: "none", borderRadius: "6px", cursor: "pointer" }}>✕</button>
                   </div>
-                  <input placeholder="Field Name" value={field.fieldName} onChange={(e) => updateFormField(index, "fieldName", e.target.value)} disabled={hasRegistrations} style={{ marginBottom: "0.5rem", width: "100%", padding: "0.5rem", border: "1px solid #ddd", borderRadius: "4px", boxSizing: "border-box" }} />
-                  <input placeholder="Field Label" value={field.fieldLabel} onChange={(e) => updateFormField(index, "fieldLabel", e.target.value)} disabled={hasRegistrations} style={{ marginBottom: "0.5rem", width: "100%", padding: "0.5rem", border: "1px solid #ddd", borderRadius: "4px", boxSizing: "border-box" }} />
-                  <select value={field.fieldType} onChange={(e) => updateFormField(index, "fieldType", e.target.value)} disabled={hasRegistrations} style={{ marginBottom: "0.5rem", width: "100%", padding: "0.5rem", border: "1px solid #ddd", borderRadius: "4px" }}>
+                  <input placeholder="Field Name" value={field.fieldName} onChange={(e) => updateFormField(index, "fieldName", e.target.value)} disabled={hasRegistrations} style={{ marginBottom: "0.5rem", width: "100%", padding: "0.5rem", border: "1.5px solid #e2e8f0", borderRadius: "8px", boxSizing: "border-box" }} />
+                  <input placeholder="Field Label" value={field.fieldLabel} onChange={(e) => updateFormField(index, "fieldLabel", e.target.value)} disabled={hasRegistrations} style={{ marginBottom: "0.5rem", width: "100%", padding: "0.5rem", border: "1.5px solid #e2e8f0", borderRadius: "8px", boxSizing: "border-box" }} />
+                  <select value={field.fieldType} onChange={(e) => updateFormField(index, "fieldType", e.target.value)} disabled={hasRegistrations} style={{ marginBottom: "0.5rem", width: "100%", padding: "0.5rem", border: "1.5px solid #e2e8f0", borderRadius: "8px" }}>
                     <option value="text">Text</option>
                     <option value="email">Email</option>
                     <option value="number">Number</option>
@@ -287,7 +288,7 @@ function EditEvent() {
                     <option value="file">File Upload</option>
                   </select>
                   {(field.fieldType === "select" || field.fieldType === "radio") && (
-                    <input placeholder="Options (comma-separated)" value={Array.isArray(field.options) ? field.options.join(", ") : ""} onChange={(e) => updateFormField(index, "options", e.target.value.split(",").map(o => o.trim()))} disabled={hasRegistrations} style={{ marginBottom: "0.5rem", width: "100%", padding: "0.5rem", border: "1px solid #ddd", borderRadius: "4px", boxSizing: "border-box" }} />
+                    <input placeholder="Options (comma-separated)" value={Array.isArray(field.options) ? field.options.join(", ") : ""} onChange={(e) => updateFormField(index, "options", e.target.value.split(",").map(o => o.trim()))} disabled={hasRegistrations} style={{ marginBottom: "0.5rem", width: "100%", padding: "0.5rem", border: "1.5px solid #e2e8f0", borderRadius: "8px", boxSizing: "border-box" }} />
                   )}
                   <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.9rem" }}>
                     <input type="checkbox" checked={field.required} onChange={(e) => updateFormField(index, "required", e.target.checked)} disabled={hasRegistrations} />
@@ -296,7 +297,7 @@ function EditEvent() {
                 </div>
               ))}
               {!hasRegistrations && (
-                <button type="button" onClick={addFormField} style={{ background: "#2196F3", color: "white", border: "none", padding: "0.5rem 1rem", borderRadius: "4px", cursor: "pointer" }}>
+                <button type="button" onClick={addFormField} style={{ background: "#6366f1", color: "white", border: "none", padding: "0.5rem 1rem", borderRadius: "8px", cursor: "pointer", fontWeight: "600" }}>
                   + Add Field
                 </button>
               )}
@@ -304,23 +305,23 @@ function EditEvent() {
           )}
 
           {formData.eventType === "merchandise" && (
-            <div style={{ border: "1px solid #ddd", padding: "1rem", borderRadius: "8px", opacity: isPublished ? 0.5 : 1 }}>
+            <div style={{ border: "1.5px solid #e2e8f0", padding: "1rem", borderRadius: "12px", background: "#f8fafc", opacity: isPublished ? 0.5 : 1 }}>
               <h3 style={{ marginTop: 0 }}>Merchandise Details {isPublished && "(locked)"}</h3>
               {[
                 { name: "sizes", placeholder: "Available Sizes (comma-separated)" },
                 { name: "colors", placeholder: "Available Colors (comma-separated)" },
                 { name: "variants", placeholder: "Variants (comma-separated)" },
               ].map(f => (
-                <input key={f.name} name={f.name} placeholder={f.placeholder} value={merchandiseDetails[f.name]} onChange={handleMerchandiseChange} readOnly={!!isPublished} style={{ marginBottom: "0.5rem", width: "100%", padding: "0.5rem", border: "1px solid #ddd", borderRadius: "4px", boxSizing: "border-box" }} />
+                <input key={f.name} name={f.name} placeholder={f.placeholder} value={merchandiseDetails[f.name]} onChange={handleMerchandiseChange} readOnly={!!isPublished} style={{ marginBottom: "0.5rem", width: "100%", padding: "0.5rem", border: "1.5px solid #e2e8f0", borderRadius: "8px", boxSizing: "border-box" }} />
               ))}
-              <input type="number" name="stockQuantity" placeholder="Stock Quantity" min="0" value={merchandiseDetails.stockQuantity} onChange={handleMerchandiseChange} readOnly={!!isPublished} style={{ marginBottom: "0.5rem", width: "100%", padding: "0.5rem", border: "1px solid #ddd", borderRadius: "4px", boxSizing: "border-box" }} />
-              <input type="number" name="purchaseLimitPerParticipant" placeholder="Purchase Limit Per Participant" min="1" value={merchandiseDetails.purchaseLimitPerParticipant} onChange={handleMerchandiseChange} readOnly={!!isPublished} style={{ width: "100%", padding: "0.5rem", border: "1px solid #ddd", borderRadius: "4px", boxSizing: "border-box" }} />
+              <input type="number" name="stockQuantity" placeholder="Stock Quantity" min="0" value={merchandiseDetails.stockQuantity} onChange={handleMerchandiseChange} readOnly={!!isPublished} style={{ marginBottom: "0.5rem", width: "100%", padding: "0.5rem", border: "1.5px solid #e2e8f0", borderRadius: "8px", boxSizing: "border-box" }} />
+              <input type="number" name="purchaseLimitPerParticipant" placeholder="Purchase Limit Per Participant" min="1" value={merchandiseDetails.purchaseLimitPerParticipant} onChange={handleMerchandiseChange} readOnly={!!isPublished} style={{ width: "100%", padding: "0.5rem", border: "1.5px solid #e2e8f0", borderRadius: "8px", boxSizing: "border-box" }} />
             </div>
           )}
 
           {isDraft && (
             <div>
-              <label style={{ fontSize: "0.85rem", color: "#555" }}>Status</label>
+              <label style={{ fontSize: "0.85rem", color: "#475569" }}>Status</label>
               <select name="status" value={formData.status} onChange={handleChange} style={inputStyle("status")}>
                 <option value="draft">Draft</option>
                 <option value="published">Published</option>
@@ -328,7 +329,7 @@ function EditEvent() {
             </div>
           )}
 
-          <button type="submit" style={{ background: "#28a745", color: "white", padding: "0.75rem", border: "none", borderRadius: "6px", fontSize: "1rem", fontWeight: "bold", cursor: "pointer" }}>
+          <button type="submit" style={{ background: "linear-gradient(135deg, #10b981, #34d399)", color: "white", padding: "0.75rem", border: "none", borderRadius: "10px", fontSize: "1rem", fontWeight: "600", cursor: "pointer", boxShadow: "0 4px 12px rgba(16,185,129,0.25)" }}>
             Update Event
           </button>
         </form>

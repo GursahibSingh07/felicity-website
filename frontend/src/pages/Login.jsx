@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import "../styles/auth.css";
 
 function Login() {
-  const { user, login } = useAuth();  
+  const { user, login, authLoading } = useAuth();  
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -12,6 +12,8 @@ function Login() {
   const [loading, setLoading] = useState(false);
   
   useEffect(() => {
+    if (authLoading) return;
+
     if (user) {
       if (user.role === "participant" && user.preferencesComplete === false) {
         navigate("/onboarding");
@@ -19,7 +21,7 @@ function Login() {
         navigate(`/${user.role}/dashboard`);
       }
     }
-  }, [user, navigate]);
+  }, [user, navigate, authLoading]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,7 +61,8 @@ function Login() {
   return (
     <div className="auth-container">
       <form className="auth-form" onSubmit={handleSubmit}>
-        <h2>Login</h2>
+        <h2>Sign in</h2>
+        <p className="auth-sub">Welcome back — let's get you in.</p>
 
         <input
           type="email"
@@ -78,7 +81,7 @@ function Login() {
         />
 
         <button disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
+          {loading ? "Signing in…" : "Sign in"}
         </button>
 
         {error && <p className="error">{error}</p>}

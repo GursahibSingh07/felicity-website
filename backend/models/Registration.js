@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Event = require("./Event");
 
 const registrationSchema = new mongoose.Schema(
   {
@@ -72,5 +73,18 @@ const registrationSchema = new mongoose.Schema(
 );
 
 registrationSchema.index({ user: 1, event: 1 }, { unique: true });
+
+const syncRegisteredCount = async (eventId) => {
+  const count = await mongoose.model("Registration").countDocuments({ event: eventId });
+  await Event.findByIdAndUpdate(eventId, { registeredCount: count });
+};
+
+registrationSchema.post("save", async function () {
+  await syncRegisteredCount(this.event);
+});
+
+registrationSchema.post("deleteOne", { document: true, query: false }, async function () {
+  await syncRegisteredCount(this.event);
+});
 
 module.exports = mongoose.model("Registration", registrationSchema);

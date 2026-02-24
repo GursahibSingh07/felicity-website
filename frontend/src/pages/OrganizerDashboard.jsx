@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
 const STATUS_COLORS = {
-  draft:      { bg: "#e9ecef", color: "#495057", label: "Draft" },
-  published:  { bg: "#cff4fc", color: "#0c5460", label: "Published" },
-  ongoing:    { bg: "#d1e7dd", color: "#0f5132", label: "Ongoing" },
-  completed:  { bg: "#d4edda", color: "#155724", label: "Completed" },
-  closed:     { bg: "#f8d7da", color: "#721c24", label: "Closed" },
-  cancelled:  { bg: "#f8d7da", color: "#721c24", label: "Cancelled" },
+  draft:      { bg: "#f1f5f9", color: "#475569", label: "Draft" },
+  published:  { bg: "#e0f2fe", color: "#0369a1", label: "Published" },
+  ongoing:    { bg: "#d1fae5", color: "#065f46", label: "Ongoing" },
+  completed:  { bg: "#dcfce7", color: "#166534", label: "Completed" },
+  closed:     { bg: "#fef2f2", color: "#991b1b", label: "Closed" },
+  cancelled:  { bg: "#fef2f2", color: "#991b1b", label: "Cancelled" },
 };
 
 function StatusBadge({ status }) {
@@ -15,8 +15,8 @@ function StatusBadge({ status }) {
   return (
     <span style={{
       background: s.bg, color: s.color,
-      padding: "0.25rem 0.75rem", borderRadius: "12px",
-      fontSize: "0.8rem", fontWeight: "bold",
+      padding: "0.25rem 0.75rem", borderRadius: "20px",
+      fontSize: "0.78rem", fontWeight: "600",
     }}>
       {s.label}
     </span>
@@ -26,8 +26,9 @@ function StatusBadge({ status }) {
 function btnStyle(bg) {
   return {
     background: bg, color: "white", border: "none",
-    padding: "0.35rem 0.75rem", borderRadius: "5px",
-    cursor: "pointer", fontSize: "0.82rem", fontWeight: "bold",
+    padding: "0.35rem 0.75rem", borderRadius: "8px",
+    cursor: "pointer", fontSize: "0.82rem", fontWeight: "600",
+    transition: "all 0.15s",
   };
 }
 
@@ -102,7 +103,7 @@ function OrganizerDashboard() {
     }
   };
 
-  if (loading) return <h2 style={{ padding: "2rem" }}>Loading...</h2>;
+  if (loading) return <h2 style={{ padding: "2rem", textAlign: "center", color: "#64748b" }}>Loading...</h2>;
 
   const completedEvents = events.filter(e => e.status === "completed" || e.status === "closed");
   const ongoingEvents   = events.filter(e => e.status === "ongoing");
@@ -121,46 +122,46 @@ function OrganizerDashboard() {
         <h1 style={{ margin: 0 }}>Organizer Dashboard</h1>
         <button
           onClick={() => navigate("/organizer/create")}
-          style={{ background: "#28a745", color: "white", border: "none", padding: "0.6rem 1.4rem", borderRadius: "6px", fontWeight: "bold", cursor: "pointer", fontSize: "1rem" }}
+          style={{ background: "linear-gradient(135deg, #10b981, #34d399)", color: "white", border: "none", padding: "0.6rem 1.4rem", borderRadius: "10px", fontWeight: "600", cursor: "pointer", fontSize: "0.95rem", boxShadow: "0 4px 12px rgba(16,185,129,0.25)" }}
         >
           + Create Event
         </button>
       </div>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p style={{ color: "#ef4444", background: "#fef2f2", padding: "0.75rem 1rem", borderRadius: "10px", fontSize: "0.9rem" }}>{error}</p>}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
         {[
-          { label: "Total Events",        value: events.length,        color: "#007bff" },
-          { label: "Total Registrations", value: totalRegistrations,   color: "#28a745" },
-          { label: "Total Revenue",       value: `₹${totalRevenue}`,   color: "#fd7e14" },
-          { label: "Ongoing Events",      value: ongoingEvents.length, color: "#17a2b8" },
-          { label: "Attendance Rate",     value: `${attendanceRate}%`, color: "#6f42c1" },
+          { label: "Total Events",        value: events.length,        color: "#6366f1" },
+          { label: "Total Registrations", value: totalRegistrations,   color: "#10b981" },
+          { label: "Total Revenue",       value: `₹${totalRevenue}`,   color: "#f59e0b" },
+          { label: "Ongoing Events",      value: ongoingEvents.length, color: "#06b6d4" },
+          { label: "Total Attended",      value: totalAttended,        color: "#8b5cf6" },
         ].map(stat => (
-          <div key={stat.label} style={{ background: "white", border: "1px solid #ddd", borderRadius: "8px", padding: "1.2rem", textAlign: "center", boxShadow: "0 2px 4px rgba(0,0,0,0.06)" }}>
+          <div key={stat.label} style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "14px", padding: "1.2rem", textAlign: "center", boxShadow: "0 4px 12px rgba(99,102,241,0.06)" }}>
             <div style={{ fontSize: "1.8rem", fontWeight: "bold", color: stat.color }}>{stat.value}</div>
-            <div style={{ fontSize: "0.85rem", color: "#666", marginTop: "0.3rem" }}>{stat.label}</div>
+            <div style={{ fontSize: "0.85rem", color: "#64748b", marginTop: "0.3rem" }}>{stat.label}</div>
           </div>
         ))}
       </div>
 
       {completedEvents.length > 0 && (
-        <div style={{ background: "white", border: "1px solid #ddd", borderRadius: "8px", padding: "1.5rem", marginBottom: "2rem" }}>
+        <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "14px", padding: "1.5rem", marginBottom: "2rem", boxShadow: "0 4px 12px rgba(99,102,241,0.06)" }}>
           <h2 style={{ marginTop: 0, fontSize: "1.2rem" }}>Completed Event Analytics</h2>
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
               <thead>
-                <tr style={{ background: "#f8f9fa" }}>
-                  {["Event", "Type", "Registrations", "Attended", "Revenue", "Attendance Rate"].map(h => (
-                    <th key={h} style={{ padding: "0.75rem", textAlign: "left", borderBottom: "2px solid #ddd" }}>{h}</th>
+                <tr style={{ background: "#f8fafc" }}>
+                  {["Event", "Type", "Registrations", "Attended", "Revenue"].map(h => (
+                    <th key={h} style={{ padding: "0.75rem", textAlign: "left", borderBottom: "2px solid #e2e8f0", fontSize: "0.82rem", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em" }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {completedEvents.map(event => (
-                  <tr key={event._id} style={{ borderBottom: "1px solid #eee" }}>
+                  <tr key={event._id} style={{ borderBottom: "1px solid #f1f5f9" }}>
                     <td style={{ padding: "0.75rem" }}>
-                      <Link to={`/organizer/events/${event._id}`} style={{ color: "#007bff", textDecoration: "none", fontWeight: "bold" }}>
+                      <Link to={`/organizer/events/${event._id}`} style={{ color: "#6366f1", textDecoration: "none", fontWeight: "600" }}>
                         {event.title}
                       </Link>
                     </td>
@@ -168,12 +169,6 @@ function OrganizerDashboard() {
                     <td style={{ padding: "0.75rem" }}>{event.registrationCount || 0}</td>
                     <td style={{ padding: "0.75rem" }}>{event.attendedCount || 0}</td>
                     <td style={{ padding: "0.75rem" }}>₹{event.revenue || 0}</td>
-                    <td style={{ padding: "0.75rem" }}>
-                      {event.registrationCount > 0
-                        ? `${Math.round(((event.attendedCount || 0) / event.registrationCount) * 100)}%`
-                        : "—"
-                      }
-                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -189,14 +184,16 @@ function OrganizerDashboard() {
             onClick={() => setActiveFilter(f)}
             style={{
               padding: "0.4rem 1rem",
-              background: activeFilter === f ? "#007bff" : "white",
-              color: activeFilter === f ? "white" : "#333",
-              border: "1px solid #ddd",
+              background: activeFilter === f ? "#6366f1" : "white",
+              color: activeFilter === f ? "white" : "#475569",
+              border: "1.5px solid",
+              borderColor: activeFilter === f ? "#6366f1" : "#e2e8f0",
               borderRadius: "20px",
               cursor: "pointer",
               fontSize: "0.85rem",
               textTransform: "capitalize",
-              fontWeight: activeFilter === f ? "bold" : "normal",
+              fontWeight: activeFilter === f ? "600" : "500",
+              transition: "all 0.15s",
             }}
           >
             {f} ({f === "all" ? events.length : events.filter(e => e.status === f).length})
@@ -205,19 +202,20 @@ function OrganizerDashboard() {
       </div>
 
       {filteredEvents.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "3rem", background: "#f9f9f9", borderRadius: "8px" }}>
-          <p style={{ color: "#666" }}>No events in this category.</p>
+        <div style={{ textAlign: "center", padding: "3rem", background: "white", borderRadius: "14px", border: "1px solid #e2e8f0" }}>
+          <p style={{ color: "#94a3b8" }}>No events in this category.</p>
         </div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "1.5rem" }}>
           {filteredEvents.map(event => (
             <div key={event._id} style={{
-              background: "white", border: "1px solid #ddd", borderRadius: "10px",
-              padding: "1.5rem", boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+              background: "white", border: "1px solid #e2e8f0", borderRadius: "16px",
+              padding: "1.5rem", boxShadow: "0 4px 12px rgba(99,102,241,0.06)",
               display: "flex", flexDirection: "column",
+              transition: "box-shadow 0.2s, transform 0.2s",
             }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.75rem" }}>
-                <h3 style={{ margin: 0, fontSize: "1.05rem", color: "#333", flex: 1, marginRight: "0.5rem" }}>
+                <h3 style={{ margin: 0, fontSize: "1.05rem", color: "#1e293b", flex: 1, marginRight: "0.5rem" }}>
                   {event.title}
                 </h3>
                 <StatusBadge status={event.status} />
@@ -225,15 +223,15 @@ function OrganizerDashboard() {
 
               <span style={{
                 display: "inline-block", width: "fit-content",
-                background: event.eventType === "merchandise" ? "#fff3cd" : "#d1ecf1",
-                color: event.eventType === "merchandise" ? "#856404" : "#0c5460",
+                background: event.eventType === "merchandise" ? "#fefce8" : "#ecfeff",
+                color: event.eventType === "merchandise" ? "#92400e" : "#0e7490",
                 padding: "0.2rem 0.6rem", borderRadius: "8px", fontSize: "0.78rem",
                 marginBottom: "0.75rem",
               }}>
                 {event.eventType === "merchandise" ? "Merchandise" : "Normal"}
               </span>
 
-              <div style={{ fontSize: "0.85rem", color: "#555", lineHeight: "1.9", flex: 1 }}>
+              <div style={{ fontSize: "0.85rem", color: "#64748b", lineHeight: "1.9", flex: 1 }}>
                 <div><strong>📅</strong> {new Date(event.date).toLocaleDateString()}{event.endDate && ` → ${new Date(event.endDate).toLocaleDateString()}`}</div>
                 <div><strong>📍</strong> {event.location}</div>
                 <div><strong>👥</strong> {event.registrationCount || 0} / {event.capacity} registered</div>
@@ -246,36 +244,36 @@ function OrganizerDashboard() {
               <div style={{ marginTop: "1rem", display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
                 <Link
                   to={`/organizer/events/${event._id}`}
-                  style={{ ...btnStyle("#007bff"), textDecoration: "none", display: "inline-block" }}
+                  style={{ ...btnStyle("#6366f1"), textDecoration: "none", display: "inline-block" }}
                 >
                   View Details
                 </Link>
 
                 {event.status === "draft" && (
                   <>
-                    <button onClick={() => navigate(`/organizer/edit/${event._id}`)} style={btnStyle("#6c757d")}>Edit</button>
-                    <button onClick={() => handleStatusChange(event._id, "published")} style={btnStyle("#28a745")}>Publish</button>
+                    <button onClick={() => navigate(`/organizer/edit/${event._id}`)} style={btnStyle("#64748b")}>Edit</button>
+                    <button onClick={() => handleStatusChange(event._id, "published")} style={btnStyle("#10b981")}>Publish</button>
                   </>
                 )}
                 {event.status === "published" && (
                   <>
-                    <button onClick={() => navigate(`/organizer/edit/${event._id}`)} style={btnStyle("#6c757d")}>Edit</button>
-                    <button onClick={() => handleStatusChange(event._id, "ongoing")} style={btnStyle("#17a2b8")}>Mark Ongoing</button>
-                    <button onClick={() => handleStatusChange(event._id, "closed")} style={btnStyle("#fd7e14")}>Close Reg</button>
-                    <button onClick={() => handleStatusChange(event._id, "draft")} style={btnStyle("#adb5bd")}>Unpublish</button>
+                    <button onClick={() => navigate(`/organizer/edit/${event._id}`)} style={btnStyle("#64748b")}>Edit</button>
+                    <button onClick={() => handleStatusChange(event._id, "ongoing")} style={btnStyle("#06b6d4")}>Mark Ongoing</button>
+                    <button onClick={() => handleStatusChange(event._id, "closed")} style={btnStyle("#f59e0b")}>Close Reg</button>
+                    <button onClick={() => handleStatusChange(event._id, "draft")} style={btnStyle("#94a3b8")}>Unpublish</button>
                   </>
                 )}
                 {event.status === "ongoing" && (
                   <>
-                    <button onClick={() => handleStatusChange(event._id, "completed")} style={btnStyle("#28a745")}>Mark Completed</button>
-                    <button onClick={() => handleStatusChange(event._id, "closed")} style={btnStyle("#fd7e14")}>Close</button>
+                    <button onClick={() => handleStatusChange(event._id, "completed")} style={btnStyle("#10b981")}>Mark Completed</button>
+                    <button onClick={() => handleStatusChange(event._id, "closed")} style={btnStyle("#f59e0b")}>Close</button>
                   </>
                 )}
 
                 {!["cancelled", "completed", "closed"].includes(event.status) && (
-                  <button onClick={() => handleCancel(event._id)} style={btnStyle("#ff9800")}>Cancel</button>
+                  <button onClick={() => handleCancel(event._id)} style={btnStyle("#f59e0b")}>Cancel</button>
                 )}
-                <button onClick={() => handleDelete(event._id)} style={btnStyle("#dc3545")}>Delete</button>
+                <button onClick={() => handleDelete(event._id)} style={btnStyle("#ef4444")}>Delete</button>
               </div>
             </div>
           ))}

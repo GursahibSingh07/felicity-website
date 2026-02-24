@@ -150,7 +150,7 @@ function Onboarding() {
   if (completed) {
     return (
       <div style={{ padding: "2rem", textAlign: "center" }}>
-        <h2 style={{ color: "green" }}>Setup Complete!</h2>
+        <h2 style={{ color: "#10b981" }}>Setup Complete!</h2>
         <p>Redirecting to your dashboard...</p>
       </div>
     );
@@ -254,7 +254,7 @@ function Onboarding() {
 const styles = {
   container: {
     minHeight: "100vh",
-    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    background: "linear-gradient(135deg, #6366f1 0%, #818cf8 50%, #a78bfa 100%)",
     padding: "2rem",
     display: "flex",
     alignItems: "center",
@@ -262,23 +262,24 @@ const styles = {
   },
   card: {
     background: "#fff",
-    borderRadius: "12px",
+    borderRadius: "20px",
     padding: "2.5rem",
     maxWidth: "700px",
     width: "100%",
-    boxShadow: "0 10px 40px rgba(0, 0, 0, 0.2)",
+    boxShadow: "0 20px 50px rgba(0, 0, 0, 0.15)",
   },
   error: {
-    background: "#fee",
-    color: "#c33",
+    background: "#fef2f2",
+    color: "#ef4444",
     padding: "1rem",
-    borderRadius: "6px",
+    borderRadius: "10px",
     marginBottom: "1.5rem",
-    border: "1px solid #fcc",
+    border: "1px solid #fecaca",
+    fontWeight: "500",
   },
   subtitle: {
     fontSize: "1.1rem",
-    color: "#666",
+    color: "#64748b",
     marginBottom: "2rem",
   },
   section: {
@@ -286,7 +287,7 @@ const styles = {
   },
   sectionDesc: {
     fontSize: "0.95rem",
-    color: "#888",
+    color: "#94a3b8",
     marginBottom: "1rem",
   },
   gridContainer: {
@@ -296,49 +297,53 @@ const styles = {
   },
   interestButton: {
     padding: "0.75rem 1rem",
-    border: "2px solid #ddd",
-    borderRadius: "8px",
+    border: "1.5px solid #e2e8f0",
+    borderRadius: "10px",
     background: "#fff",
     cursor: "pointer",
     fontSize: "0.95rem",
     fontWeight: "500",
-    transition: "all 0.2s",
+    transition: "all 0.15s",
   },
   interestButtonSelected: {
-    background: "#667eea",
+    background: "linear-gradient(135deg, #6366f1, #818cf8)",
     color: "#fff",
-    borderColor: "#667eea",
+    borderColor: "#6366f1",
+    boxShadow: "0 2px 8px rgba(99,102,241,0.25)",
   },
   organizersContainer: {
     display: "flex",
     flexDirection: "column",
-    gap: "1rem",
+    gap: "0.75rem",
   },
   organizerItem: {
     display: "flex",
     alignItems: "center",
-    padding: "0.75rem",
-    background: "#f9f9f9",
-    borderRadius: "8px",
+    padding: "0.75rem 1rem",
+    background: "#f8fafc",
+    borderRadius: "10px",
+    border: "1px solid #e2e8f0",
   },
   checkbox: {
     marginRight: "1rem",
     width: "18px",
     height: "18px",
     cursor: "pointer",
+    accentColor: "#6366f1",
   },
   organizerLabel: {
     cursor: "pointer",
     fontSize: "0.95rem",
-    color: "#333",
+    color: "#1e293b",
   },
   noData: {
-    color: "#999",
+    color: "#94a3b8",
     fontStyle: "italic",
-    padding: "1rem",
+    padding: "1.5rem",
     textAlign: "center",
-    background: "#f9f9f9",
-    borderRadius: "8px",
+    background: "#f8fafc",
+    borderRadius: "12px",
+    border: "1px solid #e2e8f0",
   },
   actionButtons: {
     display: "flex",
@@ -348,35 +353,37 @@ const styles = {
   },
   saveButton: {
     flex: 1,
-    padding: "0.75rem 1.5rem",
-    background: "#667eea",
+    padding: "0.8rem 1.5rem",
+    background: "linear-gradient(135deg, #6366f1, #818cf8)",
     color: "#fff",
     border: "none",
-    borderRadius: "8px",
+    borderRadius: "10px",
     fontSize: "1rem",
     fontWeight: "600",
     cursor: "pointer",
-    transition: "background 0.2s",
+    transition: "all 0.2s",
+    boxShadow: "0 4px 12px rgba(99,102,241,0.25)",
   },
   skipButton: {
     flex: 1,
-    padding: "0.75rem 1.5rem",
+    padding: "0.8rem 1.5rem",
     background: "#fff",
-    color: "#667eea",
-    border: "2px solid #667eea",
-    borderRadius: "8px",
+    color: "#6366f1",
+    border: "1.5px solid #6366f1",
+    borderRadius: "10px",
     fontSize: "1rem",
     fontWeight: "600",
     cursor: "pointer",
     transition: "all 0.2s",
   },
   buttonDisabled: {
-    opacity: 0.6,
+    opacity: 0.55,
     cursor: "not-allowed",
+    boxShadow: "none",
   },
   note: {
     fontSize: "0.85rem",
-    color: "#999",
+    color: "#94a3b8",
     textAlign: "center",
   },
 };

@@ -22,6 +22,12 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
+    if (user.isDisabled) {
+      return res.status(403).json({
+        message: "Your account has been disabled. Please contact the administrator.",
+      });
+    }
+
     res.json({
       message: "Login successful",
       token: generateToken(user._id),

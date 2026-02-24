@@ -1,8 +1,9 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const [authLoading, setAuthLoading] = useState(true);
   const [user, setUser] = useState(() => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
@@ -38,8 +39,35 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  useEffect(() => {
+    const verifyStoredToken = async () => {
+      if (!user?.token) {
+        setAuthLoading(false);
+        return;
+      }
+
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/verify`, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
+
+        if (!res.ok) {
+          logout();
+        }
+      } catch {
+        logout();
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+
+    verifyStoredToken();
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, updatePreferencesComplete }}>
+    <AuthContext.Provider value={{ user, login, logout, updatePreferencesComplete, authLoading }}>
       {children}
     </AuthContext.Provider>
   );

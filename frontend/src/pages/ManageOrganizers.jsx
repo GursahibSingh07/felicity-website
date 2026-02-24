@@ -166,22 +166,22 @@ function ManageOrganizers() {
         <h1 style={{ margin: 0 }}>Manage Clubs / Organizers</h1>
         <button
           onClick={() => { setShowForm(!showForm); setCredentials(null); setError(""); setSuccess(""); }}
-          style={{ background: showForm ? "#6c757d" : "#28a745", color: "white", border: "none", padding: "0.6rem 1.4rem", borderRadius: "6px", fontWeight: "bold", cursor: "pointer", fontSize: "1rem" }}
+          style={{ background: showForm ? "#64748b" : "linear-gradient(135deg, #10b981, #34d399)", color: "white", border: "none", padding: "0.6rem 1.4rem", borderRadius: "10px", fontWeight: "600", cursor: "pointer", fontSize: "1rem", boxShadow: showForm ? "none" : "0 4px 12px rgba(16,185,129,0.25)", transition: "all 0.2s" }}
         >
           {showForm ? "Cancel" : "+ Add New Club/Organizer"}
         </button>
       </div>
 
-      {error && <div style={{ background: "#fee", color: "#c33", padding: "1rem", borderRadius: "6px", marginBottom: "1rem", border: "1px solid #fcc" }}>{error}</div>}
-      {success && <div style={{ background: "#efe", color: "#2a7a2a", padding: "1rem", borderRadius: "6px", marginBottom: "1rem", border: "1px solid #cfc" }}>{success}</div>}
+      {error && <div style={{ background: "#fef2f2", color: "#ef4444", padding: "1rem", borderRadius: "10px", marginBottom: "1rem", border: "1px solid #fecaca", fontWeight: "500" }}>{error}</div>}
+      {success && <div style={{ background: "#ecfdf5", color: "#059669", padding: "1rem", borderRadius: "10px", marginBottom: "1rem", border: "1px solid #a7f3d0", fontWeight: "500" }}>{success}</div>}
 
       <div style={{ marginBottom: "1.5rem" }}>
         <button
           onClick={() => { setShowResetRequests(!showResetRequests); setResetCredentials(null); }}
           style={{
-            background: showResetRequests ? "#6c757d" : "#e67e22",
+            background: showResetRequests ? "#64748b" : "linear-gradient(135deg, #f59e0b, #fbbf24)",
             color: "white", border: "none", padding: "0.6rem 1.4rem",
-            borderRadius: "6px", fontWeight: "bold", cursor: "pointer", fontSize: "0.95rem",
+            borderRadius: "10px", fontWeight: "600", cursor: "pointer", fontSize: "0.95rem", transition: "all 0.2s",
             position: "relative",
           }}
         >
@@ -189,7 +189,7 @@ function ManageOrganizers() {
           {resetRequests.filter(r => r.status === "pending").length > 0 && (
             <span style={{
               position: "absolute", top: "-8px", right: "-8px",
-              background: "#dc3545", color: "white", borderRadius: "50%",
+              background: "#ef4444", color: "white", borderRadius: "50%",
               width: "22px", height: "22px", display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: "0.75rem", fontWeight: "bold",
             }}>
@@ -200,60 +200,60 @@ function ManageOrganizers() {
       </div>
 
       {showResetRequests && (
-        <div style={{ background: "white", border: "1px solid #ddd", borderRadius: "10px", padding: "1.5rem", marginBottom: "2rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
+        <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "16px", padding: "1.5rem", marginBottom: "2rem", boxShadow: "0 4px 16px rgba(99,102,241,0.08)" }}>
           <h2 style={{ marginTop: 0, fontSize: "1.2rem" }}>Password Reset Requests</h2>
 
           {resetCredentials && (
-            <div style={{ marginBottom: "1rem", background: "#d4edda", border: "1px solid #28a745", borderRadius: "8px", padding: "1rem" }}>
-              <h4 style={{ margin: "0 0 0.5rem 0", color: "#155724" }}>New Credentials Generated</h4>
+            <div style={{ marginBottom: "1rem", background: "#ecfdf5", border: "1.5px solid #10b981", borderRadius: "12px", padding: "1rem" }}>
+              <h4 style={{ margin: "0 0 0.5rem 0", color: "#059669" }}>New Credentials Generated</h4>
               <p style={{ margin: "0.2rem 0" }}><strong>Organizer:</strong> {resetCredentials.organizerName}</p>
               <p style={{ margin: "0.2rem 0" }}><strong>Email:</strong> <code>{resetCredentials.email}</code></p>
               <p style={{ margin: "0.2rem 0" }}><strong>New Password:</strong> <code>{resetCredentials.newPassword}</code></p>
-              <p style={{ color: "#856404", fontSize: "0.82rem", marginTop: "0.5rem", marginBottom: 0 }}>
+              <p style={{ color: "#92400e", fontSize: "0.82rem", marginTop: "0.5rem", marginBottom: 0 }}>
                 Copy and share the new password with the organizer.
               </p>
             </div>
           )}
 
           {resetRequests.length === 0 ? (
-            <p style={{ color: "#666", textAlign: "center", padding: "1rem" }}>No reset requests.</p>
+            <p style={{ color: "#64748b", textAlign: "center", padding: "1rem" }}>No reset requests.</p>
           ) : (
             <div style={{ overflowX: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
                 <thead>
-                  <tr style={{ background: "#f8f9fa" }}>
+                  <tr style={{ background: "#f8fafc" }}>
                     {["Organizer", "Email", "Reason", "Status", "Date", "Actions"].map(h => (
-                      <th key={h} style={{ padding: "0.6rem 0.75rem", textAlign: "left", borderBottom: "2px solid #ddd" }}>{h}</th>
+                      <th key={h} style={{ padding: "0.6rem 0.75rem", textAlign: "left", borderBottom: "2px solid #e2e8f0", color: "#475569", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {resetRequests.map(req => (
-                    <tr key={req._id} style={{ borderBottom: "1px solid #eee" }}>
+                    <tr key={req._id} style={{ borderBottom: "1px solid #f1f5f9" }}>
                       <td style={{ padding: "0.6rem 0.75rem", fontWeight: "bold" }}>{req.organizer?.organizerName || "—"}</td>
                       <td style={{ padding: "0.6rem 0.75rem" }}>{req.organizer?.email || "—"}</td>
                       <td style={{ padding: "0.6rem 0.75rem", maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis" }}>{req.reason}</td>
                       <td style={{ padding: "0.6rem 0.75rem" }}>
                         <span style={{
                           padding: "0.2rem 0.5rem", borderRadius: "10px", fontSize: "0.8rem", fontWeight: "bold", color: "white",
-                          background: req.status === "pending" ? "#ffc107" : req.status === "approved" ? "#28a745" : "#dc3545",
+                          background: req.status === "pending" ? "#f59e0b" : req.status === "approved" ? "#10b981" : "#ef4444",
                         }}>{req.status.toUpperCase()}</span>
                       </td>
-                      <td style={{ padding: "0.6rem 0.75rem", fontSize: "0.85rem", color: "#666" }}>{new Date(req.createdAt).toLocaleDateString()}</td>
+                      <td style={{ padding: "0.6rem 0.75rem", fontSize: "0.85rem", color: "#64748b" }}>{new Date(req.createdAt).toLocaleDateString()}</td>
                       <td style={{ padding: "0.6rem 0.75rem" }}>
                         {req.status === "pending" ? (
                           <div style={{ display: "flex", gap: "0.3rem" }}>
                             <button onClick={() => handleApproveReset(req._id)} style={{
-                              background: "#28a745", color: "white", border: "none", padding: "0.3rem 0.7rem",
-                              borderRadius: "4px", cursor: "pointer", fontSize: "0.8rem", fontWeight: "bold",
+                              background: "#10b981", color: "white", border: "none", padding: "0.3rem 0.7rem",
+                              borderRadius: "8px", cursor: "pointer", fontSize: "0.8rem", fontWeight: "600",
                             }}>Approve</button>
                             <button onClick={() => handleRejectReset(req._id)} style={{
-                              background: "#dc3545", color: "white", border: "none", padding: "0.3rem 0.7rem",
-                              borderRadius: "4px", cursor: "pointer", fontSize: "0.8rem", fontWeight: "bold",
+                              background: "#ef4444", color: "white", border: "none", padding: "0.3rem 0.7rem",
+                              borderRadius: "8px", cursor: "pointer", fontSize: "0.8rem", fontWeight: "600",
                             }}>Reject</button>
                           </div>
                         ) : (
-                          <span style={{ fontSize: "0.8rem", color: "#888" }}>
+                          <span style={{ fontSize: "0.8rem", color: "#94a3b8" }}>
                             {req.adminComment && `"${req.adminComment}"`}
                           </span>
                         )}
@@ -268,49 +268,49 @@ function ManageOrganizers() {
       )}
 
       {showForm && (
-        <div style={{ background: "white", border: "1px solid #ddd", borderRadius: "10px", padding: "1.5rem", marginBottom: "2rem", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
+        <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "16px", padding: "1.5rem", marginBottom: "2rem", boxShadow: "0 4px 16px rgba(99,102,241,0.08)" }}>
           <h2 style={{ marginTop: 0, fontSize: "1.2rem" }}>Create New Organizer Account</h2>
-          <p style={{ color: "#666", fontSize: "0.9rem", marginBottom: "1rem" }}>
+          <p style={{ color: "#64748b", fontSize: "0.9rem", marginBottom: "1rem" }}>
             Leave email and password blank to auto-generate credentials.
           </p>
           <form onSubmit={handleCreate} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
             <div style={{ gridColumn: "1 / -1" }}>
-              <label style={{ fontSize: "0.85rem", color: "#555" }}>Organizer / Club Name *</label>
-              <input value={formData.organizerName} onChange={e => setFormData({ ...formData, organizerName: e.target.value })} required style={{ width: "100%", padding: "0.6rem", border: "1px solid #ddd", borderRadius: "6px", boxSizing: "border-box" }} />
+              <label style={{ fontSize: "0.85rem", color: "#475569" }}>Organizer / Club Name *</label>
+              <input value={formData.organizerName} onChange={e => setFormData({ ...formData, organizerName: e.target.value })} required style={{ width: "100%", padding: "0.6rem", border: "1.5px solid #e2e8f0", borderRadius: "10px", boxSizing: "border-box" }} />
             </div>
             <div>
-              <label style={{ fontSize: "0.85rem", color: "#555" }}>Category *</label>
-              <input value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} required placeholder="e.g. Technical, Cultural, Sports" style={{ width: "100%", padding: "0.6rem", border: "1px solid #ddd", borderRadius: "6px", boxSizing: "border-box" }} />
+              <label style={{ fontSize: "0.85rem", color: "#475569" }}>Category *</label>
+              <input value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} required placeholder="e.g. Technical, Cultural, Sports" style={{ width: "100%", padding: "0.6rem", border: "1.5px solid #e2e8f0", borderRadius: "10px", boxSizing: "border-box" }} />
             </div>
             <div>
-              <label style={{ fontSize: "0.85rem", color: "#555" }}>Email (optional)</label>
-              <input type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="Auto-generated if blank" style={{ width: "100%", padding: "0.6rem", border: "1px solid #ddd", borderRadius: "6px", boxSizing: "border-box" }} />
+              <label style={{ fontSize: "0.85rem", color: "#475569" }}>Email (optional)</label>
+              <input type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="Auto-generated if blank" style={{ width: "100%", padding: "0.6rem", border: "1.5px solid #e2e8f0", borderRadius: "10px", boxSizing: "border-box" }} />
             </div>
             <div style={{ gridColumn: "1 / -1" }}>
-              <label style={{ fontSize: "0.85rem", color: "#555" }}>Description *</label>
-              <textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} required rows="3" style={{ width: "100%", padding: "0.6rem", border: "1px solid #ddd", borderRadius: "6px", boxSizing: "border-box", resize: "vertical" }} />
+              <label style={{ fontSize: "0.85rem", color: "#475569" }}>Description *</label>
+              <textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} required rows="3" style={{ width: "100%", padding: "0.6rem", border: "1.5px solid #e2e8f0", borderRadius: "10px", boxSizing: "border-box", resize: "vertical" }} />
             </div>
             <div>
-              <label style={{ fontSize: "0.85rem", color: "#555" }}>Password (optional)</label>
-              <input type="text" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} placeholder="Auto-generated if blank" style={{ width: "100%", padding: "0.6rem", border: "1px solid #ddd", borderRadius: "6px", boxSizing: "border-box" }} />
+              <label style={{ fontSize: "0.85rem", color: "#475569" }}>Password (optional)</label>
+              <input type="text" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} placeholder="Auto-generated if blank" style={{ width: "100%", padding: "0.6rem", border: "1.5px solid #e2e8f0", borderRadius: "10px", boxSizing: "border-box" }} />
             </div>
             <div style={{ display: "flex", alignItems: "flex-end" }}>
-              <button type="submit" style={{ background: "#28a745", color: "white", border: "none", padding: "0.65rem 1.5rem", borderRadius: "6px", fontWeight: "bold", cursor: "pointer", width: "100%" }}>
+              <button type="submit" style={{ background: "linear-gradient(135deg, #10b981, #34d399)", color: "white", border: "none", padding: "0.65rem 1.5rem", borderRadius: "10px", fontWeight: "600", cursor: "pointer", width: "100%", boxShadow: "0 4px 12px rgba(16,185,129,0.25)" }}>
                 Create Account
               </button>
             </div>
           </form>
 
           {credentials && (
-            <div style={{ marginTop: "1.5rem", background: "#fff3cd", border: "1px solid #ffc107", borderRadius: "8px", padding: "1.25rem" }}>
-              <h3 style={{ margin: "0 0 0.75rem 0", color: "#856404" }}>Generated Credentials — Share with Organizer</h3>
+            <div style={{ marginTop: "1.5rem", background: "#fef3c7", border: "1.5px solid #f59e0b", borderRadius: "12px", padding: "1.25rem" }}>
+              <h3 style={{ margin: "0 0 0.75rem 0", color: "#92400e" }}>Generated Credentials — Share with Organizer</h3>
               <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "0.5rem 1rem", fontSize: "0.95rem" }}>
                 <strong>Email:</strong>
-                <code style={{ background: "#f8f9fa", padding: "0.3rem 0.6rem", borderRadius: "4px", fontFamily: "monospace" }}>{credentials.email}</code>
+                <code style={{ background: "#f1f5f9", padding: "0.3rem 0.6rem", borderRadius: "6px", fontFamily: "monospace" }}>{credentials.email}</code>
                 <strong>Password:</strong>
-                <code style={{ background: "#f8f9fa", padding: "0.3rem 0.6rem", borderRadius: "4px", fontFamily: "monospace" }}>{credentials.password}</code>
+                <code style={{ background: "#f1f5f9", padding: "0.3rem 0.6rem", borderRadius: "6px", fontFamily: "monospace" }}>{credentials.password}</code>
               </div>
-              <p style={{ color: "#856404", fontSize: "0.82rem", marginTop: "0.75rem", marginBottom: 0 }}>
+              <p style={{ color: "#92400e", fontSize: "0.82rem", marginTop: "0.75rem", marginBottom: 0 }}>
                 ⚠ Copy these credentials now. The password cannot be viewed again after leaving this page.
               </p>
             </div>
@@ -318,48 +318,48 @@ function ManageOrganizers() {
         </div>
       )}
 
-      <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem", fontSize: "0.9rem", color: "#666" }}>
+      <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem", fontSize: "0.9rem", color: "#64748b" }}>
         <span>Total: <strong>{organizers.length}</strong></span>
         <span>Active: <strong>{organizers.filter(o => !o.isDisabled).length}</strong></span>
         <span>Disabled: <strong>{organizers.filter(o => o.isDisabled).length}</strong></span>
       </div>
 
       {organizers.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "3rem", background: "#f9f9f9", borderRadius: "8px" }}>
-          <p style={{ color: "#666" }}>No organizers registered yet.</p>
+        <div style={{ textAlign: "center", padding: "3rem", background: "white", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+          <p style={{ color: "#64748b" }}>No organizers registered yet.</p>
         </div>
       ) : (
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem", background: "white" }}>
             <thead>
-              <tr style={{ background: "#f8f9fa" }}>
+                <tr style={{ background: "#f8fafc" }}>
                 {["Name", "Email", "Category", "Events", "Status", "Created", "Actions"].map(h => (
-                  <th key={h} style={{ padding: "0.75rem 1rem", textAlign: "left", borderBottom: "2px solid #ddd", whiteSpace: "nowrap" }}>{h}</th>
+                  <th key={h} style={{ padding: "0.75rem 1rem", textAlign: "left", borderBottom: "2px solid #e2e8f0", whiteSpace: "nowrap", color: "#475569", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {organizers.map(org => (
-                <tr key={org._id} style={{ borderBottom: "1px solid #eee", opacity: org.isDisabled ? 0.6 : 1 }}>
+                <tr key={org._id} style={{ borderBottom: "1px solid #f1f5f9", opacity: org.isDisabled ? 0.6 : 1 }}>
                   <td style={{ padding: "0.75rem 1rem", fontWeight: "bold" }}>{org.organizerName || "—"}</td>
                   <td style={{ padding: "0.75rem 1rem" }}>{org.email}</td>
                   <td style={{ padding: "0.75rem 1rem" }}>
-                    <span style={{ background: "#e9ecef", padding: "0.2rem 0.6rem", borderRadius: "10px", fontSize: "0.8rem" }}>{org.category || "—"}</span>
+                    <span style={{ background: "#ede9fe", padding: "0.2rem 0.6rem", borderRadius: "20px", fontSize: "0.8rem", color: "#7c3aed" }}>{org.category || "—"}</span>
                   </td>
                   <td style={{ padding: "0.75rem 1rem", textAlign: "center" }}>{org.eventCount ?? 0}</td>
                   <td style={{ padding: "0.75rem 1rem" }}>
                     <span style={{
-                      background: org.isDisabled ? "#f8d7da" : "#d4edda",
-                      color: org.isDisabled ? "#721c24" : "#155724",
+                      background: org.isDisabled ? "#fef2f2" : "#ecfdf5",
+                      color: org.isDisabled ? "#ef4444" : "#059669",
                       padding: "0.2rem 0.6rem",
-                      borderRadius: "10px",
+                      borderRadius: "20px",
                       fontSize: "0.8rem",
-                      fontWeight: "bold",
+                      fontWeight: "600",
                     }}>
                       {org.isDisabled ? "Disabled" : "Active"}
                     </span>
                   </td>
-                  <td style={{ padding: "0.75rem 1rem", fontSize: "0.85rem", color: "#666" }}>
+                  <td style={{ padding: "0.75rem 1rem", fontSize: "0.85rem", color: "#64748b" }}>
                     {org.createdAt ? new Date(org.createdAt).toLocaleDateString() : "—"}
                   </td>
                   <td style={{ padding: "0.75rem 1rem" }}>
@@ -367,22 +367,22 @@ function ManageOrganizers() {
                       <button
                         onClick={() => handleToggle(org._id)}
                         style={{
-                          background: org.isDisabled ? "#28a745" : "#fd7e14",
+                          background: org.isDisabled ? "#10b981" : "#f59e0b",
                           color: "white", border: "none", padding: "0.3rem 0.7rem",
-                          borderRadius: "4px", cursor: "pointer", fontSize: "0.8rem", fontWeight: "bold",
+                          borderRadius: "8px", cursor: "pointer", fontSize: "0.8rem", fontWeight: "600",
                         }}
                       >
                         {org.isDisabled ? "Enable" : "Disable"}
                       </button>
                       <button
                         onClick={() => handleResetPassword(org._id)}
-                        style={{ background: "#007bff", color: "white", border: "none", padding: "0.3rem 0.7rem", borderRadius: "4px", cursor: "pointer", fontSize: "0.8rem", fontWeight: "bold" }}
+                        style={{ background: "#6366f1", color: "white", border: "none", padding: "0.3rem 0.7rem", borderRadius: "8px", cursor: "pointer", fontSize: "0.8rem", fontWeight: "600" }}
                       >
                         Reset Password
                       </button>
                       <button
                         onClick={() => handleDelete(org._id)}
-                        style={{ background: "#dc3545", color: "white", border: "none", padding: "0.3rem 0.7rem", borderRadius: "4px", cursor: "pointer", fontSize: "0.8rem", fontWeight: "bold" }}
+                        style={{ background: "#ef4444", color: "white", border: "none", padding: "0.3rem 0.7rem", borderRadius: "8px", cursor: "pointer", fontSize: "0.8rem", fontWeight: "600" }}
                       >
                         Delete
                       </button>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 function ParticipantDashboard() {
   const [events, setEvents] = useState([]);
@@ -123,7 +124,7 @@ function ParticipantDashboard() {
         style={{
           fontSize: interactive ? "2rem" : "1rem",
           cursor: interactive ? "pointer" : "default",
-          color: star <= (hover || rating) ? "#ffc107" : "#e0e0e0",
+          color: star <= (hover || rating) ? "#f59e0b" : "#e2e8f0",
           transition: "color 0.15s",
         }}
       >
@@ -134,17 +135,30 @@ function ParticipantDashboard() {
   
   const now = new Date();
 
-  const cancelledEvents = events.filter(event => 
-    event.status === "cancelled" || event.eventStatus === "cancelled" ||
-    event.status === "draft" || event.eventStatus === "draft"
-  );
+  const cancelledEvents = events.filter(event => {
+    const s = event.eventStatus || event.status;
+    return s === "cancelled" || s === "draft";
+  });
   
-  const nonCancelledEvents = events.filter(event => 
-    event.status === "published" && event.eventStatus !== "cancelled"
-  );
+  const nonCancelledEvents = events.filter(event => {
+    const s = event.eventStatus || event.status;
+    return s !== "cancelled" && s !== "draft";
+  });
   
-  const upcomingEvents = nonCancelledEvents.filter(event => new Date(event.date) > now);
-  const completedEvents = nonCancelledEvents.filter(event => new Date(event.endDate || event.date) < now);
+  const completedEvents = nonCancelledEvents.filter(event => {
+    const s = event.eventStatus || event.status;
+    return s === "completed" || s === "closed" || new Date(event.endDate || event.date) < now;
+  });
+  const ongoingEvents = nonCancelledEvents.filter(event => {
+    const s = event.eventStatus || event.status;
+    const start = new Date(event.date);
+    const end = new Date(event.endDate || event.date);
+    return s === "ongoing" || (start <= now && now <= end && s !== "completed" && s !== "closed");
+  });
+  const upcomingEvents = nonCancelledEvents.filter(event => {
+    const s = event.eventStatus || event.status;
+    return s !== "completed" && s !== "closed" && s !== "ongoing" && new Date(event.date) > now;
+  });
   const normalEvents = nonCancelledEvents.filter(event => event.eventType === "normal");
   const merchandiseEvents = nonCancelledEvents.filter(event => event.eventType === "merchandise");
 
@@ -152,6 +166,8 @@ function ParticipantDashboard() {
     switch (activeTab) {
       case "upcoming":
         return upcomingEvents;
+      case "ongoing":
+        return ongoingEvents;
       case "normal":
         return normalEvents;
       case "merchandise":
@@ -167,36 +183,39 @@ function ParticipantDashboard() {
 
   const filteredEvents = getFilteredEvents();
 
-  if (loading) return <h2 style={{ padding: "2rem" }}>Loading...</h2>;
+  if (loading) return <h2 style={{ padding: "2rem", textAlign: "center", color: "#64748b" }}>Loading...</h2>;
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h1>My Events Dashboard</h1>
-      <p style={{ color: "#666", marginBottom: "2rem" }}>
+    <div style={{ padding: "2rem", maxWidth: "1400px", margin: "0 auto" }}>
+      <h1 style={{ marginBottom: "0.25rem" }}>My Events Dashboard</h1>
+      <p style={{ color: "#64748b", marginBottom: "2rem" }}>
         Manage your event registrations and view participation history
       </p>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p style={{ color: "#ef4444", background: "#fef2f2", padding: "0.75rem 1rem", borderRadius: "10px", fontSize: "0.9rem" }}>{error}</p>}
 
-      <div style={{ marginBottom: "2rem", borderBottom: "2px solid #ddd" }}>
-        {["upcoming", "normal", "merchandise", "completed", "cancelled"].map((tab) => (
+      <div style={{ marginBottom: "2rem", display: "flex", gap: "0.4rem", flexWrap: "wrap", background: "#f1f5f9", padding: "0.35rem", borderRadius: "12px" }}>
+        {["upcoming", "ongoing", "normal", "merchandise", "completed", "cancelled"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             style={{
-              padding: "0.75rem 1.5rem",
-              background: activeTab === tab ? "#007bff" : "transparent",
-              color: activeTab === tab ? "white" : "#007bff",
+              padding: "0.6rem 1.25rem",
+              background: activeTab === tab ? "white" : "transparent",
+              color: activeTab === tab ? "#6366f1" : "#64748b",
               border: "none",
-              borderBottom: activeTab === tab ? "3px solid #007bff" : "none",
+              borderRadius: "10px",
               cursor: "pointer",
-              fontSize: "1rem",
-              fontWeight: activeTab === tab ? "bold" : "normal",
-              textTransform: "capitalize"
+              fontSize: "0.9rem",
+              fontWeight: activeTab === tab ? "600" : "500",
+              textTransform: "capitalize",
+              boxShadow: activeTab === tab ? "0 2px 8px rgba(99,102,241,0.1)" : "none",
+              transition: "all 0.15s"
             }}
           >
             {tab} ({
               tab === "upcoming" ? upcomingEvents.length :
+              tab === "ongoing" ? ongoingEvents.length :
               tab === "normal" ? normalEvents.length :
               tab === "merchandise" ? merchandiseEvents.length :
               tab === "completed" ? completedEvents.length :
@@ -207,8 +226,8 @@ function ParticipantDashboard() {
       </div>
 
       {filteredEvents.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "3rem", background: "#f9f9f9", borderRadius: "8px" }}>
-          <p style={{ color: "#666", fontSize: "1.1rem" }}>
+        <div style={{ textAlign: "center", padding: "3rem", background: "white", borderRadius: "16px", border: "1px solid #e2e8f0" }}>
+          <p style={{ color: "#94a3b8", fontSize: "1.1rem" }}>
             No events found in this category
           </p>
         </div>
@@ -219,23 +238,24 @@ function ParticipantDashboard() {
               key={event._id}
               style={{
                 padding: "1.5rem",
-                border: "1px solid #ddd",
-                borderRadius: "8px",
+                border: "1px solid #e2e8f0",
+                borderRadius: "16px",
                 background: "white",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+                boxShadow: "0 4px 12px rgba(99,102,241,0.06)",
+                transition: "box-shadow 0.2s, transform 0.2s",
               }}
             >
-              <h3 style={{ marginTop: 0, color: "#333" }}>{event.title}</h3>
+              <h3 style={{ marginTop: 0, color: "#1e293b" }}>{event.title}</h3>
               
               <div style={{ marginBottom: "1rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
                 <span style={{ 
                   display: "inline-block",
                   padding: "0.25rem 0.75rem", 
-                  background: event.eventType === "normal" ? "#28a745" : "#ff9800",
+                  background: event.eventType === "normal" ? "#10b981" : "#f59e0b",
                   color: "white",
-                  borderRadius: "12px",
-                  fontSize: "0.85rem",
-                  fontWeight: "bold"
+                  borderRadius: "20px",
+                  fontSize: "0.8rem",
+                  fontWeight: "600"
                 }}>
                   {event.eventType === "normal" ? "Normal Event" : "Merchandise"}
                 </span>
@@ -243,11 +263,11 @@ function ParticipantDashboard() {
                   <span style={{ 
                     display: "inline-block",
                     padding: "0.25rem 0.75rem", 
-                    background: "#dc3545",
+                    background: "#ef4444",
                     color: "white",
-                    borderRadius: "12px",
-                    fontSize: "0.85rem",
-                    fontWeight: "bold"
+                    borderRadius: "20px",
+                    fontSize: "0.8rem",
+                    fontWeight: "600"
                   }}>
                     Cancelled
                   </span>
@@ -257,11 +277,11 @@ function ParticipantDashboard() {
                   <span style={{ 
                     display: "inline-block",
                     padding: "0.25rem 0.75rem", 
-                    background: "#6c757d",
+                    background: "#94a3b8",
                     color: "white",
-                    borderRadius: "12px",
-                    fontSize: "0.85rem",
-                    fontWeight: "bold"
+                    borderRadius: "20px",
+                    fontSize: "0.8rem",
+                    fontWeight: "600"
                   }}>
                     Unpublished
                   </span>
@@ -270,8 +290,8 @@ function ParticipantDashboard() {
                   <span style={{
                     display: "inline-block",
                     padding: "0.25rem 0.75rem",
-                    background: event.paymentStatus === "approved" ? "#d4edda" : event.paymentStatus === "pending" ? "#fff3cd" : "#f8d7da",
-                    color: event.paymentStatus === "approved" ? "#155724" : event.paymentStatus === "pending" ? "#856404" : "#721c24",
+                    background: event.paymentStatus === "approved" ? "#ecfdf5" : event.paymentStatus === "pending" ? "#fefce8" : "#fef2f2",
+                    color: event.paymentStatus === "approved" ? "#065f46" : event.paymentStatus === "pending" ? "#92400e" : "#ef4444",
                     borderRadius: "12px",
                     fontSize: "0.85rem",
                     fontWeight: "bold",
@@ -281,7 +301,7 @@ function ParticipantDashboard() {
                 )}
               </div>
 
-              <p style={{ color: "#666", fontSize: "0.95rem", marginBottom: "1rem" }}>
+              <p style={{ color: "#64748b", fontSize: "0.93rem", marginBottom: "1rem", lineHeight: "1.6" }}>
                 {event.description}
               </p>
 
@@ -296,7 +316,7 @@ function ParticipantDashboard() {
                 )}
                 <p><strong>🎫 Ticket ID:</strong> 
                   <span style={{ 
-                    background: "#e3f2fd", 
+                    background: "#eef2ff", 
                     padding: "0.2rem 0.5rem", 
                     borderRadius: "4px",
                     marginLeft: "0.5rem",
@@ -316,7 +336,7 @@ function ParticipantDashboard() {
                   {event.tags.map(tag => (
                     <span key={tag} style={{ 
                       display: "inline-block", 
-                      background: "#e0e0e0", 
+                      background: "#e2e8f0", 
                       padding: "0.2rem 0.5rem", 
                       borderRadius: "3px", 
                       marginRight: "0.4rem",
@@ -330,42 +350,64 @@ function ParticipantDashboard() {
               )}
 
               {event.paymentStatus === "rejected" && event.rejectionReason && (
-                <div style={{ marginTop: "1rem", padding: "0.75rem", background: "#f8d7da", borderRadius: "6px", fontSize: "0.9rem", color: "#721c24" }}>
+                <div style={{ marginTop: "1rem", padding: "0.75rem", background: "#fef2f2", borderRadius: "10px", fontSize: "0.9rem", color: "#ef4444" }}>
                   <strong>Rejection Reason:</strong> {event.rejectionReason}
                 </div>
               )}
 
               {event.paymentStatus === "pending" && (
-                <div style={{ marginTop: "1rem", padding: "0.75rem", background: "#fff3cd", borderRadius: "6px", fontSize: "0.9rem", color: "#856404" }}>
+                <div style={{ marginTop: "1rem", padding: "0.75rem", background: "#fefce8", borderRadius: "10px", fontSize: "0.9rem", color: "#92400e" }}>
                   Payment is pending approval. QR code will be available once approved.
                 </div>
               )}
 
               {event.qrCode && (
-                <div style={{ textAlign: "center", marginTop: "1rem", padding: "1rem", background: "#f9f9f9", borderRadius: "8px" }}>
+                <div style={{ textAlign: "center", marginTop: "1rem", padding: "1rem", background: "#f8fafc", borderRadius: "12px" }}>
                   <img
                     src={event.qrCode}
                     alt="QR Code"
                     style={{ width: "120px", height: "120px" }}
                   />
-                  <p style={{ fontSize: "0.8rem", color: "#666", marginTop: "0.5rem" }}>
+                <p style={{ fontSize: "0.8rem", color: "#94a3b8", marginTop: "0.5rem" }}>
                     Show this QR at the event
                   </p>
                 </div>
               )}
 
+              <Link
+                to={`/events/${event._id}`}
+                style={{
+                  display: "block",
+                  marginTop: "1rem",
+                  width: "100%",
+                  background: "linear-gradient(135deg, #6366f1, #818cf8)",
+                  color: "white",
+                  border: "none",
+                  padding: "0.7rem",
+                  borderRadius: "10px",
+                  textAlign: "center",
+                  textDecoration: "none",
+                  fontWeight: "600",
+                  fontSize: "0.9rem",
+                  boxSizing: "border-box",
+                }}
+              >
+                View Details
+              </Link>
+
               {activeTab === "upcoming" && (
                 <button
                   style={{
-                    marginTop: "1rem",
+                    marginTop: "0.5rem",
                     width: "100%",
-                    background: "#dc3545",
+                    background: "linear-gradient(135deg, #ef4444, #f87171)",
                     color: "white",
                     border: "none",
-                    padding: "0.75rem",
-                    borderRadius: "5px",
+                    padding: "0.7rem",
+                    borderRadius: "10px",
                     cursor: "pointer",
-                    fontWeight: "bold"
+                    fontWeight: "600",
+                    fontSize: "0.9rem"
                   }}
                   onClick={() => handleUnregister(event._id)}
                 >
@@ -379,14 +421,14 @@ function ParticipantDashboard() {
                   style={{
                     marginTop: "0.75rem",
                     width: "100%",
-                    background: existingFeedbacks[event._id] ? "#6c757d" : "#ffc107",
-                    color: existingFeedbacks[event._id] ? "white" : "#333",
+                    background: existingFeedbacks[event._id] ? "#64748b" : "linear-gradient(135deg, #f59e0b, #fbbf24)",
+                    color: existingFeedbacks[event._id] ? "white" : "#1e293b",
                     border: "none",
-                    padding: "0.75rem",
-                    borderRadius: "5px",
+                    padding: "0.7rem",
+                    borderRadius: "10px",
                     cursor: "pointer",
-                    fontWeight: "bold",
-                    fontSize: "0.95rem",
+                    fontWeight: "600",
+                    fontSize: "0.9rem",
                   }}
                 >
                   {existingFeedbacks[event._id] ? "✓ Edit Feedback" : "⭐ Rate this Event"}
@@ -404,15 +446,16 @@ function ParticipantDashboard() {
           justifyContent: "center", zIndex: 1000,
         }}>
           <div style={{
-            background: "white", borderRadius: "12px", padding: "2rem",
+            background: "white", borderRadius: "20px", padding: "2rem",
             maxWidth: "450px", width: "90%", textAlign: "center",
+            boxShadow: "0 20px 50px rgba(0,0,0,0.15)",
           }}>
             <h2 style={{ marginTop: 0, marginBottom: "0.25rem" }}>Rate your experience</h2>
-            <p style={{ color: "#666", marginBottom: "1.5rem", fontSize: "0.95rem" }}>{feedbackModal.title}</p>
+            <p style={{ color: "#64748b", marginBottom: "1.5rem", fontSize: "0.95rem" }}>{feedbackModal.title}</p>
 
             <div style={{ marginBottom: "1.5rem" }}>
               {renderStars(feedbackRating, feedbackHover, true)}
-              <p style={{ fontSize: "0.85rem", color: "#999", marginTop: "0.3rem" }}>
+              <p style={{ fontSize: "0.85rem", color: "#94a3b8", marginTop: "0.3rem" }}>
                 {feedbackRating === 1 ? "Terrible" : feedbackRating === 2 ? "Poor" : feedbackRating === 3 ? "Average" : feedbackRating === 4 ? "Good" : feedbackRating === 5 ? "Excellent" : "Tap a star to rate"}
               </p>
             </div>
@@ -424,22 +467,22 @@ function ParticipantDashboard() {
               rows="4"
               maxLength={1000}
               style={{
-                width: "100%", padding: "0.75rem", border: "1px solid #ddd",
+                width: "100%", padding: "0.75rem", border: "1px solid #e2e8f0",
                 borderRadius: "8px", resize: "vertical", fontSize: "0.95rem",
                 boxSizing: "border-box", fontFamily: "inherit",
               }}
             />
-            <p style={{ fontSize: "0.75rem", color: "#bbb", textAlign: "right", margin: "0.25rem 0 1rem 0" }}>
+            <p style={{ fontSize: "0.75rem", color: "#cbd5e1", textAlign: "right", margin: "0.25rem 0 1rem 0" }}>
               {feedbackComment.length}/1000
             </p>
 
-            <div style={{ padding: "0.5rem", background: "#f0f8ff", borderRadius: "6px", marginBottom: "1rem", fontSize: "0.8rem", color: "#666" }}>
+            <div style={{ padding: "0.5rem", background: "#eef2ff", borderRadius: "6px", marginBottom: "1rem", fontSize: "0.8rem", color: "#64748b" }}>
               🔒 Your feedback is anonymous — organizers cannot see your identity.
             </div>
 
             {feedbackMessage && (
               <p style={{
-                color: feedbackMessage.includes("submitted") || feedbackMessage.includes("updated") ? "#28a745" : "#dc3545",
+                color: feedbackMessage.includes("submitted") || feedbackMessage.includes("updated") ? "#10b981" : "#ef4444",
                 fontSize: "0.9rem", marginBottom: "0.75rem",
               }}>{feedbackMessage}</p>
             )}
@@ -449,8 +492,8 @@ function ParticipantDashboard() {
                 onClick={handleSubmitFeedback}
                 disabled={feedbackSubmitting || feedbackRating === 0}
                 style={{
-                  flex: 1, padding: "0.75rem", border: "none", borderRadius: "8px",
-                  background: feedbackRating > 0 ? "#28a745" : "#ccc",
+                  flex: 1, padding: "0.75rem", border: "none", borderRadius: "10px",
+                  background: feedbackRating > 0 ? "linear-gradient(135deg, #10b981, #34d399)" : "#e2e8f0",
                   color: "white", fontWeight: "bold", fontSize: "1rem",
                   cursor: feedbackRating > 0 ? "pointer" : "not-allowed",
                 }}
@@ -460,8 +503,8 @@ function ParticipantDashboard() {
               <button
                 onClick={() => setFeedbackModal(null)}
                 style={{
-                  flex: 1, padding: "0.75rem", border: "1px solid #ddd", borderRadius: "8px",
-                  background: "white", color: "#666", fontWeight: "bold", fontSize: "1rem", cursor: "pointer",
+                  flex: 1, padding: "0.75rem", border: "1.5px solid #e2e8f0", borderRadius: "10px",
+                  background: "white", color: "#64748b", fontWeight: "600", fontSize: "1rem", cursor: "pointer",
                 }}
               >
                 Cancel

@@ -156,24 +156,26 @@ function QRScanner() {
   const tabStyle = (tab) => ({
     padding: "0.65rem 1.4rem",
     border: "none",
-    borderBottom: `3px solid ${activeView === tab ? "#007bff" : "transparent"}`,
-    background: "none",
-    color: activeView === tab ? "#007bff" : "#666",
-    fontWeight: activeView === tab ? "bold" : "normal",
+    borderRadius: "10px",
+    background: activeView === tab ? "white" : "transparent",
+    color: activeView === tab ? "#6366f1" : "#64748b",
+    fontWeight: activeView === tab ? "600" : "500",
     cursor: "pointer",
     fontSize: "0.95rem",
+    boxShadow: activeView === tab ? "0 2px 8px rgba(99,102,241,0.1)" : "none",
+    transition: "all 0.15s",
   });
 
   return (
     <div style={{ padding: "2rem", maxWidth: "1100px", margin: "0 auto" }}>
-      <button onClick={() => navigate(-1)} style={{ background: "none", border: "1px solid #ccc", padding: "0.4rem 1rem", borderRadius: "6px", cursor: "pointer", marginBottom: "1.5rem", fontSize: "0.9rem" }}>
+      <button onClick={() => navigate(-1)} style={{ background: "#f8fafc", border: "1.5px solid #e2e8f0", padding: "0.4rem 1rem", borderRadius: "10px", cursor: "pointer", marginBottom: "1.5rem", fontSize: "0.9rem", color: "#475569", fontWeight: "500" }}>
         ← Back
       </button>
 
       <h1 style={{ marginBottom: "0.5rem" }}>QR Scanner & Attendance</h1>
-      {dashboard && <p style={{ color: "#666", marginBottom: "1.5rem" }}>{dashboard.eventTitle}</p>}
+      {dashboard && <p style={{ color: "#64748b", marginBottom: "1.5rem" }}>{dashboard.eventTitle}</p>}
 
-      <div style={{ borderBottom: "1px solid #eee", marginBottom: "2rem", display: "flex", gap: "0" }}>
+      <div style={{ marginBottom: "2rem", display: "flex", gap: "0.4rem", background: "#f1f5f9", padding: "0.35rem", borderRadius: "12px" }}>
         {["scanner", "dashboard"].map(tab => (
           <button key={tab} onClick={() => { setActiveView(tab); if (tab === "scanner") stopScanner(); }} style={tabStyle(tab)}>
             {tab === "scanner" ? "Scan QR" : "Attendance Dashboard"}
@@ -184,23 +186,23 @@ function QRScanner() {
       {activeView === "scanner" && (
         <div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginBottom: "2rem" }}>
-            <div style={{ border: "1px solid #ddd", borderRadius: "8px", padding: "1.5rem", textAlign: "center" }}>
+            <div style={{ border: "1.5px solid #e2e8f0", borderRadius: "12px", padding: "1.5rem", textAlign: "center" }}>
               <h3 style={{ marginTop: 0 }}>Camera Scanner</h3>
               <div id="qr-reader" ref={scannerRef} style={{ width: "100%", maxWidth: "320px", margin: "0 auto 1rem auto" }} />
               {!scanning ? (
-                <button onClick={startScanner} style={{ background: "#007bff", color: "white", border: "none", padding: "0.6rem 1.5rem", borderRadius: "6px", cursor: "pointer", fontWeight: "bold", fontSize: "0.95rem" }}>
+                <button onClick={startScanner} style={{ background: "linear-gradient(135deg, #6366f1, #818cf8)", color: "white", border: "none", padding: "0.6rem 1.5rem", borderRadius: "10px", cursor: "pointer", fontWeight: "600", fontSize: "0.95rem", boxShadow: "0 4px 12px rgba(99,102,241,0.25)" }}>
                   Start Camera
                 </button>
               ) : (
-                <button onClick={stopScanner} style={{ background: "#dc3545", color: "white", border: "none", padding: "0.6rem 1.5rem", borderRadius: "6px", cursor: "pointer", fontWeight: "bold", fontSize: "0.95rem" }}>
+                <button onClick={stopScanner} style={{ background: "#ef4444", color: "white", border: "none", padding: "0.6rem 1.5rem", borderRadius: "10px", cursor: "pointer", fontWeight: "600", fontSize: "0.95rem" }}>
                   Stop Camera
                 </button>
               )}
             </div>
 
-            <div style={{ border: "1px solid #ddd", borderRadius: "8px", padding: "1.5rem" }}>
+            <div style={{ border: "1.5px solid #e2e8f0", borderRadius: "12px", padding: "1.5rem" }}>
               <h3 style={{ marginTop: 0 }}>Manual Entry</h3>
-              <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "1rem" }}>
+              <p style={{ fontSize: "0.9rem", color: "#64748b", marginBottom: "1rem" }}>
                 Enter ticket ID manually if camera is unavailable
               </p>
               <form onSubmit={handleManualScan} style={{ display: "flex", gap: "0.5rem" }}>
@@ -209,9 +211,9 @@ function QRScanner() {
                   value={manualTicket}
                   onChange={e => setManualTicket(e.target.value)}
                   placeholder="Enter Ticket ID..."
-                  style={{ flex: 1, padding: "0.5rem 0.75rem", border: "1px solid #ddd", borderRadius: "6px", fontSize: "0.95rem" }}
+                  style={{ flex: 1, padding: "0.5rem 0.75rem", border: "1.5px solid #e2e8f0", borderRadius: "10px", fontSize: "0.95rem" }}
                 />
-                <button type="submit" style={{ background: "#28a745", color: "white", border: "none", padding: "0.5rem 1.2rem", borderRadius: "6px", cursor: "pointer", fontWeight: "bold" }}>
+                <button type="submit" style={{ background: "linear-gradient(135deg, #10b981, #34d399)", color: "white", border: "none", padding: "0.5rem 1.2rem", borderRadius: "10px", cursor: "pointer", fontWeight: "600" }}>
                   Scan
                 </button>
               </form>
@@ -219,13 +221,13 @@ function QRScanner() {
           </div>
 
           {scanError && (
-            <div style={{ padding: "1rem", background: "#f8d7da", color: "#721c24", borderRadius: "8px", marginBottom: "1rem" }}>
+            <div style={{ padding: "1rem", background: "#fef2f2", color: "#ef4444", borderRadius: "12px", marginBottom: "1rem", border: "1px solid #fecaca" }}>
               {scanError}
             </div>
           )}
 
           {scanResult && scanResult.type === "success" && (
-            <div style={{ padding: "1.25rem", background: "#d4edda", color: "#155724", borderRadius: "8px", marginBottom: "1rem" }}>
+            <div style={{ padding: "1.25rem", background: "#ecfdf5", color: "#059669", borderRadius: "12px", marginBottom: "1rem", border: "1px solid #a7f3d0" }}>
               <h3 style={{ margin: "0 0 0.5rem 0" }}>Attendance Marked!</h3>
               <p style={{ margin: "0.2rem 0" }}><strong>Name:</strong> {scanResult.participant?.name}</p>
               <p style={{ margin: "0.2rem 0" }}><strong>Email:</strong> {scanResult.participant?.email}</p>
@@ -237,7 +239,7 @@ function QRScanner() {
           )}
 
           {scanResult && scanResult.type === "duplicate" && (
-            <div style={{ padding: "1.25rem", background: "#fff3cd", color: "#856404", borderRadius: "8px", marginBottom: "1rem" }}>
+            <div style={{ padding: "1.25rem", background: "#fef3c7", color: "#92400e", borderRadius: "12px", marginBottom: "1rem", border: "1px solid #fde68a" }}>
               <h3 style={{ margin: "0 0 0.5rem 0" }}>Duplicate Scan!</h3>
               <p style={{ margin: "0.2rem 0" }}>{scanResult.message}</p>
               <p style={{ margin: "0.2rem 0", fontSize: "0.85rem" }}>
@@ -249,21 +251,21 @@ function QRScanner() {
 
           {dashboard && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem", marginTop: "1rem" }}>
-              <div style={{ background: "white", border: "1px solid #ddd", borderRadius: "8px", padding: "1.25rem", textAlign: "center" }}>
-                <div style={{ fontSize: "1.8rem", fontWeight: "bold", color: "#007bff" }}>{dashboard.totalEligible}</div>
-                <div style={{ fontSize: "0.85rem", color: "#666" }}>Total Eligible</div>
+              <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "1.25rem", textAlign: "center" }}>
+                <div style={{ fontSize: "1.8rem", fontWeight: "bold", color: "#6366f1" }}>{dashboard.totalEligible}</div>
+                <div style={{ fontSize: "0.85rem", color: "#64748b" }}>Total Eligible</div>
               </div>
-              <div style={{ background: "white", border: "1px solid #ddd", borderRadius: "8px", padding: "1.25rem", textAlign: "center" }}>
-                <div style={{ fontSize: "1.8rem", fontWeight: "bold", color: "#28a745" }}>{dashboard.attendedCount}</div>
-                <div style={{ fontSize: "0.85rem", color: "#666" }}>Scanned</div>
+              <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "1.25rem", textAlign: "center" }}>
+                <div style={{ fontSize: "1.8rem", fontWeight: "bold", color: "#10b981" }}>{dashboard.attendedCount}</div>
+                <div style={{ fontSize: "0.85rem", color: "#64748b" }}>Scanned</div>
               </div>
-              <div style={{ background: "white", border: "1px solid #ddd", borderRadius: "8px", padding: "1.25rem", textAlign: "center" }}>
-                <div style={{ fontSize: "1.8rem", fontWeight: "bold", color: "#dc3545" }}>{dashboard.notAttendedCount}</div>
-                <div style={{ fontSize: "0.85rem", color: "#666" }}>Not Scanned</div>
+              <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "1.25rem", textAlign: "center" }}>
+                <div style={{ fontSize: "1.8rem", fontWeight: "bold", color: "#ef4444" }}>{dashboard.notAttendedCount}</div>
+                <div style={{ fontSize: "0.85rem", color: "#64748b" }}>Not Scanned</div>
               </div>
-              <div style={{ background: "white", border: "1px solid #ddd", borderRadius: "8px", padding: "1.25rem", textAlign: "center" }}>
-                <div style={{ fontSize: "1.8rem", fontWeight: "bold", color: "#6f42c1" }}>{dashboard.attendanceRate}%</div>
-                <div style={{ fontSize: "0.85rem", color: "#666" }}>Rate</div>
+              <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "1.25rem", textAlign: "center" }}>
+                <div style={{ fontSize: "1.8rem", fontWeight: "bold", color: "#8b5cf6" }}>{dashboard.attendanceRate}%</div>
+                <div style={{ fontSize: "0.85rem", color: "#64748b" }}>Rate</div>
               </div>
             </div>
           )}
@@ -280,48 +282,48 @@ function QRScanner() {
             <>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem", flexWrap: "wrap", gap: "1rem" }}>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem", flex: 1 }}>
-                  <div style={{ background: "#e3f2fd", padding: "1rem", borderRadius: "8px", textAlign: "center" }}>
+                  <div style={{ background: "#e0f2fe", padding: "1rem", borderRadius: "12px", textAlign: "center" }}>
                     <div style={{ fontSize: "1.5rem", fontWeight: "bold" }}>{dashboard.totalEligible}</div>
-                    <div style={{ fontSize: "0.85rem", color: "#666" }}>Total</div>
+                    <div style={{ fontSize: "0.85rem", color: "#64748b" }}>Total</div>
                   </div>
-                  <div style={{ background: "#d4edda", padding: "1rem", borderRadius: "8px", textAlign: "center" }}>
-                    <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#155724" }}>{dashboard.attendedCount}</div>
-                    <div style={{ fontSize: "0.85rem", color: "#666" }}>Attended</div>
+                  <div style={{ background: "#ecfdf5", padding: "1rem", borderRadius: "12px", textAlign: "center" }}>
+                    <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#059669" }}>{dashboard.attendedCount}</div>
+                    <div style={{ fontSize: "0.85rem", color: "#64748b" }}>Attended</div>
                   </div>
-                  <div style={{ background: "#f8d7da", padding: "1rem", borderRadius: "8px", textAlign: "center" }}>
-                    <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#721c24" }}>{dashboard.notAttendedCount}</div>
-                    <div style={{ fontSize: "0.85rem", color: "#666" }}>Not Yet</div>
+                  <div style={{ background: "#fef2f2", padding: "1rem", borderRadius: "12px", textAlign: "center" }}>
+                    <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#ef4444" }}>{dashboard.notAttendedCount}</div>
+                    <div style={{ fontSize: "0.85rem", color: "#64748b" }}>Not Yet</div>
                   </div>
-                  <div style={{ background: "#e8daef", padding: "1rem", borderRadius: "8px", textAlign: "center" }}>
-                    <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#6f42c1" }}>{dashboard.attendanceRate}%</div>
-                    <div style={{ fontSize: "0.85rem", color: "#666" }}>Rate</div>
+                  <div style={{ background: "#ede9fe", padding: "1rem", borderRadius: "12px", textAlign: "center" }}>
+                    <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#8b5cf6" }}>{dashboard.attendanceRate}%</div>
+                    <div style={{ fontSize: "0.85rem", color: "#64748b" }}>Rate</div>
                   </div>
                 </div>
-                <button onClick={handleExportCSV} style={{ background: "#28a745", color: "white", border: "none", padding: "0.6rem 1.2rem", borderRadius: "6px", cursor: "pointer", fontWeight: "bold" }}>
+                <button onClick={handleExportCSV} style={{ background: "linear-gradient(135deg, #10b981, #34d399)", color: "white", border: "none", padding: "0.6rem 1.2rem", borderRadius: "10px", cursor: "pointer", fontWeight: "600", boxShadow: "0 4px 12px rgba(16,185,129,0.25)" }}>
                   Export CSV
                 </button>
               </div>
 
-              <div style={{ background: "#f9f9f9", borderRadius: "8px", padding: "1.5rem", border: "1px solid #eee", marginBottom: "1.5rem" }}>
+              <div style={{ background: "#f8fafc", borderRadius: "12px", padding: "1.5rem", border: "1px solid #e2e8f0", marginBottom: "1.5rem" }}>
                 <h3 style={{ marginTop: 0 }}>Attendance Progress</h3>
-                <div style={{ background: "#e9ecef", borderRadius: "8px", height: "24px", overflow: "hidden" }}>
-                  <div style={{ background: "#28a745", height: "100%", width: `${dashboard.attendanceRate}%`, transition: "width 0.5s" }} />
+                <div style={{ background: "#e2e8f0", borderRadius: "8px", height: "24px", overflow: "hidden" }}>
+                  <div style={{ background: "linear-gradient(135deg, #10b981, #34d399)", height: "100%", width: `${dashboard.attendanceRate}%`, transition: "width 0.5s" }} />
                 </div>
-                <p style={{ fontSize: "0.85rem", color: "#666", marginTop: "0.5rem" }}>
+                <p style={{ fontSize: "0.85rem", color: "#64748b", marginTop: "0.5rem" }}>
                   {dashboard.attendedCount} / {dashboard.totalEligible} checked in ({dashboard.attendanceRate}%)
                 </p>
               </div>
 
               <h3>Attended ({dashboard.attended.length})</h3>
               {dashboard.attended.length === 0 ? (
-                <p style={{ color: "#666" }}>No attendees yet.</p>
+                <p style={{ color: "#64748b" }}>No attendees yet.</p>
               ) : (
                 <div style={{ overflowX: "auto", marginBottom: "2rem" }}>
                   <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
                     <thead>
-                      <tr style={{ background: "#d4edda" }}>
+                      <tr style={{ background: "#ecfdf5" }}>
                         {["Name", "Email", "Ticket ID", "Scanned At", "Method", "Action"].map(h => (
-                          <th key={h} style={{ padding: "0.6rem 0.75rem", textAlign: "left", borderBottom: "2px solid #ddd" }}>{h}</th>
+                          <th key={h} style={{ padding: "0.6rem 0.75rem", textAlign: "left", borderBottom: "2px solid #e2e8f0", color: "#475569", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
@@ -333,12 +335,12 @@ function QRScanner() {
                           <td style={{ padding: "0.6rem 0.75rem", fontFamily: "monospace", fontSize: "0.8rem" }}>{a.ticketId}</td>
                           <td style={{ padding: "0.6rem 0.75rem", fontSize: "0.85rem" }}>{a.attendedAt ? new Date(a.attendedAt).toLocaleString() : "—"}</td>
                           <td style={{ padding: "0.6rem 0.75rem" }}>
-                            <span style={{ background: a.attendanceMethod === "qr_scan" ? "#cff4fc" : "#fff3cd", padding: "0.2rem 0.5rem", borderRadius: "8px", fontSize: "0.78rem", fontWeight: "bold" }}>
+                            <span style={{ background: a.attendanceMethod === "qr_scan" ? "#e0f2fe" : "#fef3c7", padding: "0.2rem 0.5rem", borderRadius: "20px", fontSize: "0.78rem", fontWeight: "600", color: a.attendanceMethod === "qr_scan" ? "#0369a1" : "#92400e" }}>
                               {a.attendanceMethod === "qr_scan" ? "QR Scan" : "Manual"}
                             </span>
                           </td>
                           <td style={{ padding: "0.6rem 0.75rem" }}>
-                            <button onClick={() => { setOverrideModal(a.registrationId); setOverrideAction("unmark"); setOverrideReason(""); }} style={{ background: "#ffc107", color: "#333", border: "none", padding: "0.25rem 0.6rem", borderRadius: "4px", cursor: "pointer", fontSize: "0.8rem" }}>
+                            <button onClick={() => { setOverrideModal(a.registrationId); setOverrideAction("unmark"); setOverrideReason(""); }} style={{ background: "#f59e0b", color: "white", border: "none", padding: "0.25rem 0.6rem", borderRadius: "8px", cursor: "pointer", fontSize: "0.8rem", fontWeight: "600" }}>
                               Unmark
                             </button>
                           </td>
@@ -351,26 +353,26 @@ function QRScanner() {
 
               <h3>Not Yet Attended ({dashboard.notAttended.length})</h3>
               {dashboard.notAttended.length === 0 ? (
-                <p style={{ color: "#666" }}>Everyone has checked in!</p>
+                <p style={{ color: "#64748b" }}>Everyone has checked in!</p>
               ) : (
                 <div style={{ overflowX: "auto" }}>
                   <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9rem" }}>
                     <thead>
-                      <tr style={{ background: "#f8d7da" }}>
+                      <tr style={{ background: "#fef2f2" }}>
                         {["Name", "Email", "Ticket ID", "Registered", "Action"].map(h => (
-                          <th key={h} style={{ padding: "0.6rem 0.75rem", textAlign: "left", borderBottom: "2px solid #ddd" }}>{h}</th>
+                          <th key={h} style={{ padding: "0.6rem 0.75rem", textAlign: "left", borderBottom: "2px solid #e2e8f0", color: "#475569", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {dashboard.notAttended.map(a => (
-                        <tr key={a.registrationId} style={{ borderBottom: "1px solid #eee" }}>
+                        <tr key={a.registrationId} style={{ borderBottom: "1px solid #f1f5f9" }}>
                           <td style={{ padding: "0.6rem 0.75rem" }}>{a.name}</td>
                           <td style={{ padding: "0.6rem 0.75rem" }}>{a.email}</td>
                           <td style={{ padding: "0.6rem 0.75rem", fontFamily: "monospace", fontSize: "0.8rem" }}>{a.ticketId}</td>
                           <td style={{ padding: "0.6rem 0.75rem", fontSize: "0.85rem" }}>{new Date(a.registrationDate).toLocaleDateString()}</td>
                           <td style={{ padding: "0.6rem 0.75rem" }}>
-                            <button onClick={() => { setOverrideModal(a.registrationId); setOverrideAction("mark"); setOverrideReason(""); }} style={{ background: "#28a745", color: "white", border: "none", padding: "0.25rem 0.6rem", borderRadius: "4px", cursor: "pointer", fontSize: "0.8rem" }}>
+                            <button onClick={() => { setOverrideModal(a.registrationId); setOverrideAction("mark"); setOverrideReason(""); }} style={{ background: "#10b981", color: "white", border: "none", padding: "0.25rem 0.6rem", borderRadius: "8px", cursor: "pointer", fontSize: "0.8rem", fontWeight: "600" }}>
                               Mark Attended
                             </button>
                           </td>
@@ -386,12 +388,12 @@ function QRScanner() {
       )}
 
       {overrideModal && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
-          <div style={{ background: "white", padding: "2rem", borderRadius: "8px", maxWidth: "400px", width: "90%" }}>
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(15,23,42,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+          <div style={{ background: "white", padding: "2rem", borderRadius: "20px", maxWidth: "400px", width: "90%", boxShadow: "0 20px 50px rgba(0,0,0,0.15)" }}>
             <h3 style={{ marginTop: 0 }}>
               {overrideAction === "mark" ? "Manual Mark Attendance" : "Unmark Attendance"}
             </h3>
-            <p style={{ fontSize: "0.9rem", color: "#666" }}>
+            <p style={{ fontSize: "0.9rem", color: "#64748b" }}>
               This action requires a reason for audit logging.
             </p>
             <label style={{ display: "block", marginBottom: "0.3rem", fontWeight: "bold" }}>Reason *</label>
@@ -400,13 +402,13 @@ function QRScanner() {
               onChange={e => setOverrideReason(e.target.value)}
               rows={3}
               placeholder="Enter reason for manual override..."
-              style={{ width: "100%", padding: "0.5rem", borderRadius: "4px", border: "1px solid #ddd", marginBottom: "1rem" }}
+              style={{ width: "100%", padding: "0.5rem", borderRadius: "10px", border: "1.5px solid #e2e8f0", marginBottom: "1rem" }}
             />
             <div style={{ display: "flex", gap: "0.75rem" }}>
-              <button onClick={handleManualOverride} style={{ flex: 1, background: overrideAction === "mark" ? "#28a745" : "#ffc107", color: overrideAction === "mark" ? "white" : "#333", border: "none", padding: "0.6rem", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>
+              <button onClick={handleManualOverride} style={{ flex: 1, background: overrideAction === "mark" ? "#10b981" : "#f59e0b", color: "white", border: "none", padding: "0.6rem", borderRadius: "10px", cursor: "pointer", fontWeight: "600" }}>
                 Confirm
               </button>
-              <button onClick={() => setOverrideModal(null)} style={{ flex: 1, background: "#6c757d", color: "white", border: "none", padding: "0.6rem", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>
+              <button onClick={() => setOverrideModal(null)} style={{ flex: 1, background: "#f1f5f9", color: "#475569", border: "1.5px solid #e2e8f0", padding: "0.6rem", borderRadius: "10px", cursor: "pointer", fontWeight: "600" }}>
                 Cancel
               </button>
             </div>

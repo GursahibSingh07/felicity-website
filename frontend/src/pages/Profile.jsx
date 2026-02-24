@@ -333,15 +333,17 @@ function Profile() {
           >
             Account
           </button>
-          <button
-            onClick={() => setActiveTab("security")}
-            style={{
-              ...styles.tab,
-              ...(activeTab === "security" ? styles.tabActive : {}),
-            }}
-          >
-            Security
-          </button>
+          {user?.role !== "admin" && (
+            <button
+              onClick={() => setActiveTab("security")}
+              style={{
+                ...styles.tab,
+                ...(activeTab === "security" ? styles.tabActive : {}),
+              }}
+            >
+              Security
+            </button>
+          )}
           {user?.role === "organizer" && (
             <button
               onClick={() => setActiveTab("resetRequest")}
@@ -545,7 +547,7 @@ function Profile() {
                       style={styles.input}
                       placeholder="https://discord.com/api/webhooks/..."
                     />
-                    <span style={{ fontSize: "0.8rem", color: "#888", marginTop: "0.35rem" }}>
+                    <span style={{ fontSize: "0.8rem", color: "#94a3b8", marginTop: "0.35rem" }}>
                       When set, new published events will be announced to your Discord channel automatically.
                     </span>
                   </div>
@@ -669,7 +671,7 @@ function Profile() {
                 disabled={resetSubmitting || !resetReason.trim()}
                 style={{
                   ...styles.saveButton,
-                  background: resetSubmitting || !resetReason.trim() ? "#ccc" : "#e67e22",
+                  background: resetSubmitting || !resetReason.trim() ? "#cbd5e1" : "linear-gradient(135deg, #f59e0b, #fbbf24)",
                   cursor: resetSubmitting || !resetReason.trim() ? "not-allowed" : "pointer",
                 }}
               >
@@ -688,9 +690,9 @@ function Profile() {
                   {resetRequests.map(req => (
                     <div key={req._id} style={{
                       padding: "1rem",
-                      background: req.status === "pending" ? "#fff3cd" : req.status === "approved" ? "#d4edda" : "#f8d7da",
-                      borderRadius: "8px",
-                      border: `1px solid ${req.status === "pending" ? "#ffc107" : req.status === "approved" ? "#28a745" : "#dc3545"}`,
+                      background: req.status === "pending" ? "#fef3c7" : req.status === "approved" ? "#ecfdf5" : "#fef2f2",
+                      borderRadius: "12px",
+                      border: `1.5px solid ${req.status === "pending" ? "#f59e0b" : req.status === "approved" ? "#10b981" : "#ef4444"}`,
                     }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <span style={{
@@ -699,15 +701,15 @@ function Profile() {
                           fontSize: "0.8rem",
                           fontWeight: "bold",
                           color: "white",
-                          background: req.status === "pending" ? "#ffc107" : req.status === "approved" ? "#28a745" : "#dc3545",
+                          background: req.status === "pending" ? "#f59e0b" : req.status === "approved" ? "#10b981" : "#ef4444",
                         }}>
                           {req.status.toUpperCase()}
                         </span>
-                        <span style={{ fontSize: "0.8rem", color: "#666" }}>{new Date(req.createdAt).toLocaleDateString()}</span>
+                        <span style={{ fontSize: "0.8rem", color: "#64748b" }}>{new Date(req.createdAt).toLocaleDateString()}</span>
                       </div>
                       <p style={{ margin: "0.5rem 0 0 0", fontSize: "0.9rem" }}><strong>Reason:</strong> {req.reason}</p>
-                      {req.adminComment && <p style={{ margin: "0.3rem 0 0 0", fontSize: "0.85rem", color: "#555" }}><strong>Admin Comment:</strong> {req.adminComment}</p>}
-                      {req.processedAt && <p style={{ margin: "0.3rem 0 0 0", fontSize: "0.8rem", color: "#888" }}>Processed: {new Date(req.processedAt).toLocaleString()}</p>}
+                      {req.adminComment && <p style={{ margin: "0.3rem 0 0 0", fontSize: "0.85rem", color: "#475569" }}><strong>Admin Comment:</strong> {req.adminComment}</p>}
+                      {req.processedAt && <p style={{ margin: "0.3rem 0 0 0", fontSize: "0.8rem", color: "#94a3b8" }}>Processed: {new Date(req.processedAt).toLocaleString()}</p>}
                     </div>
                   ))}
                 </div>
@@ -723,74 +725,83 @@ function Profile() {
 const styles = {
   container: {
     minHeight: "100vh",
-    background: "#f5f5f5",
     padding: "2rem",
   },
   card: {
     background: "#fff",
-    borderRadius: "12px",
+    borderRadius: "20px",
     padding: "2.5rem",
     maxWidth: "700px",
     margin: "0 auto",
-    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)",
+    boxShadow: "0 4px 20px rgba(99,102,241,0.08)",
+    border: "1px solid #e2e8f0",
   },
   header: {
     marginBottom: "2rem",
-    borderBottom: "2px solid #f0f0f0",
+    borderBottom: "1.5px solid #f1f5f9",
     paddingBottom: "1rem",
   },
   email: {
-    color: "#666",
+    color: "#64748b",
     fontSize: "0.95rem",
     margin: "0.5rem 0 0 0",
   },
   tabsContainer: {
     display: "flex",
-    gap: "1rem",
+    gap: "0.4rem",
     marginBottom: "2rem",
-    borderBottom: "1px solid #eee",
+    background: "#f1f5f9",
+    padding: "0.35rem",
+    borderRadius: "12px",
   },
   tab: {
-    padding: "0.75rem 1.5rem",
-    background: "none",
+    padding: "0.6rem 1.25rem",
+    background: "transparent",
     border: "none",
-    borderBottom: "3px solid transparent",
+    borderRadius: "10px",
     cursor: "pointer",
-    fontSize: "0.95rem",
+    fontSize: "0.9rem",
     fontWeight: "500",
-    color: "#999",
-    transition: "all 0.2s",
+    color: "#64748b",
+    transition: "all 0.15s",
   },
   tabActive: {
-    color: "#667eea",
-    borderBottomColor: "#667eea",
+    color: "#6366f1",
+    background: "white",
+    boxShadow: "0 2px 8px rgba(99,102,241,0.1)",
+    fontWeight: "600",
   },
   tabContent: {
     animation: "fadeIn 0.3s ease-in",
   },
   error: {
-    background: "#fee",
-    color: "#c33",
+    background: "#fef2f2",
+    color: "#ef4444",
     padding: "1rem",
-    borderRadius: "6px",
+    borderRadius: "10px",
     marginBottom: "1.5rem",
-    border: "1px solid #fcc",
+    border: "1px solid #fecaca",
+    fontWeight: "500",
+    fontSize: "0.9rem",
   },
   success: {
-    background: "#efe",
-    color: "#3c3",
+    background: "#ecfdf5",
+    color: "#059669",
     padding: "1rem",
-    borderRadius: "6px",
+    borderRadius: "10px",
     marginBottom: "1.5rem",
-    border: "1px solid #cfc",
+    border: "1px solid #a7f3d0",
+    fontWeight: "500",
+    fontSize: "0.9rem",
   },
   section: {
     marginBottom: "2rem",
   },
   sectionDesc: {
-    fontSize: "0.95rem",
-    color: "#888",
+    fontSize: "0.93rem",
+    color: "#94a3b8",
     marginBottom: "1rem",
+    lineHeight: "1.5",
   },
   gridContainer: {
     display: "grid",
@@ -799,55 +810,59 @@ const styles = {
   },
   interestButton: {
     padding: "0.75rem 1rem",
-    border: "2px solid #ddd",
-    borderRadius: "8px",
+    border: "1.5px solid #e2e8f0",
+    borderRadius: "10px",
     background: "#fff",
     cursor: "pointer",
-    fontSize: "0.95rem",
+    fontSize: "0.9rem",
     fontWeight: "500",
-    transition: "all 0.2s",
+    transition: "all 0.15s",
   },
   interestButtonSelected: {
-    background: "#667eea",
+    background: "linear-gradient(135deg, #6366f1, #818cf8)",
     color: "#fff",
-    borderColor: "#667eea",
+    borderColor: "#6366f1",
+    boxShadow: "0 2px 8px rgba(99,102,241,0.25)",
   },
   organizersContainer: {
     display: "flex",
     flexDirection: "column",
-    gap: "1rem",
+    gap: "0.75rem",
   },
   organizerItem: {
     display: "flex",
     alignItems: "center",
-    padding: "0.75rem",
-    background: "#f9f9f9",
-    borderRadius: "8px",
+    padding: "0.75rem 1rem",
+    background: "#f8fafc",
+    borderRadius: "10px",
+    border: "1px solid #e2e8f0",
   },
   checkbox: {
     marginRight: "1rem",
     width: "18px",
     height: "18px",
     cursor: "pointer",
+    accentColor: "#6366f1",
   },
   organizerLabel: {
     cursor: "pointer",
     fontSize: "0.95rem",
-    color: "#333",
+    color: "#1e293b",
   },
   noData: {
-    color: "#999",
+    color: "#94a3b8",
     fontStyle: "italic",
-    padding: "1rem",
+    padding: "1.5rem",
     textAlign: "center",
-    background: "#f9f9f9",
-    borderRadius: "8px",
+    background: "#f8fafc",
+    borderRadius: "12px",
+    border: "1px solid #e2e8f0",
   },
   infoRow: {
     display: "flex",
     marginBottom: "1rem",
     paddingBottom: "0.75rem",
-    borderBottom: "1px solid #eee",
+    borderBottom: "1px solid #f1f5f9",
   },
   editRow: {
     display: "flex",
@@ -856,36 +871,41 @@ const styles = {
   },
   input: {
     padding: "0.75rem",
-    border: "1px solid #ddd",
-    borderRadius: "8px",
+    border: "1.5px solid #e2e8f0",
+    borderRadius: "10px",
     fontSize: "0.95rem",
     marginTop: "0.5rem",
     fontFamily: "inherit",
+    transition: "border-color 0.2s, box-shadow 0.2s",
+    outline: "none",
   },
   saveButton: {
     width: "100%",
-    padding: "0.75rem 1.5rem",
-    background: "#667eea",
+    padding: "0.8rem 1.5rem",
+    background: "linear-gradient(135deg, #6366f1, #818cf8)",
     color: "#fff",
     border: "none",
-    borderRadius: "8px",
+    borderRadius: "10px",
     fontSize: "1rem",
     fontWeight: "600",
     cursor: "pointer",
-    transition: "background 0.2s",
+    transition: "all 0.2s",
     marginTop: "1rem",
+    boxShadow: "0 4px 12px rgba(99,102,241,0.25)",
   },
   buttonDisabled: {
-    opacity: 0.6,
+    opacity: 0.55,
     cursor: "not-allowed",
+    boxShadow: "none",
   },
   note: {
-    background: "#f0f0f0",
+    background: "#f8fafc",
     padding: "1rem",
-    borderRadius: "8px",
-    color: "#666",
+    borderRadius: "10px",
+    color: "#64748b",
     fontSize: "0.9rem",
     marginTop: "2rem",
+    border: "1px solid #e2e8f0",
   },
 };
 

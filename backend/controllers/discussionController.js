@@ -27,33 +27,48 @@ exports.getMessages = async (req, res) => {
 
     const messages = await DiscussionMessage.find({
       event: req.params.eventId,
-      parentMessage: null,
-    })
-      .populate("author", "email firstName lastName organizerName role")
-      .sort({ isPinned: -1, createdAt: -1 });
-
-    const messageIds = messages.map((m) => m._id);
-    const replies = await DiscussionMessage.find({
-      parentMessage: { $in: messageIds },
-      isDeleted: false,
     })
       .populate("author", "email firstName lastName organizerName role")
       .sort({ createdAt: 1 });
 
-    const replyMap = {};
-    replies.forEach((r) => {
-      const pid = r.parentMessage.toString();
-      if (!replyMap[pid]) replyMap[pid] = [];
-      replyMap[pid].push(r);
+    const messageMap = new Map();
+    messages.forEach((message) => {
+      messageMap.set(message._id.toString(), { ...message.toObject(), replies: [] });
     });
 
-    const result = messages.map((m) => ({
-      ...m.toObject(),
-      replies: replyMap[m._id.toString()] || [],
-    }));
+    const roots = [];
+    messageMap.forEach((message) => {
+      if (message.parentMessage) {
+        const parent = messageMap.get(message.parentMessage.toString());
+        if (parent) {
+          parent.replies.push(message);
+        } else {
+          roots.push(message);
+        }
+      } else {
+        roots.push(message);
+      }
+    });
+
+    const sortRepliesRecursively = (items) => {
+      items.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      items.forEach((item) => {
+        if (item.replies?.length) {
+          sortRepliesRecursively(item.replies);
+        }
+      });
+    };
+
+    roots.sort((a, b) => {
+      if ((b.isPinned ? 1 : 0) !== (a.isPinned ? 1 : 0)) {
+        return (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0);
+      }
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+    sortRepliesRecursively(roots);
 
     res.status(200).json({
-      messages: result,
+      messages: roots,
       isOrganizer: access.isOrganizer,
     });
   } catch (error) {

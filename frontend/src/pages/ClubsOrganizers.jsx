@@ -94,23 +94,24 @@ function ClubsOrganizers() {
     }
   };
 
-  if (loading) return <h2 style={{ padding: "2rem" }}>Loading organizers...</h2>;
+  if (loading) return <h2 style={{ padding: "2rem", textAlign: "center", color: "#64748b" }}>Loading organizers...</h2>;
 
   return (
     <div style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
       <h1>Clubs & Organizers</h1>
-      <p style={{ color: "#666", marginBottom: "2rem" }}>
+      <p style={{ color: "#64748b", marginBottom: "2rem" }}>
         Browse and follow your favorite event organizers
       </p>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p style={{ color: "#ef4444", background: "#fef2f2", padding: "0.75rem 1rem", borderRadius: "10px", fontSize: "0.9rem" }}>{error}</p>}
       {message && (
         <div style={{
           padding: "1rem",
-          background: message.includes("success") ? "#d4edda" : "#f8d7da",
-          color: message.includes("success") ? "#155724" : "#721c24",
-          borderRadius: "4px",
-          marginBottom: "1rem"
+          background: message.includes("success") ? "#d1fae5" : "#fef2f2",
+          color: message.includes("success") ? "#065f46" : "#991b1b",
+          borderRadius: "10px",
+          marginBottom: "1rem",
+          fontWeight: "500"
         }}>
           {message}
         </div>
@@ -120,10 +121,11 @@ function ClubsOrganizers() {
         <div style={{
           textAlign: "center",
           padding: "3rem",
-          background: "#f9f9f9",
-          borderRadius: "8px"
+          background: "white",
+          borderRadius: "16px",
+          border: "1px solid #e2e8f0"
         }}>
-          <p style={{ color: "#666", fontSize: "1.1rem" }}>
+          <p style={{ color: "#94a3b8", fontSize: "1.1rem" }}>
             No organizers found
           </p>
         </div>
@@ -141,22 +143,24 @@ function ClubsOrganizers() {
                 key={organizer._id}
                 style={{
                   padding: "1.5rem",
-                  border: "1px solid #ddd",
-                  borderRadius: "8px",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: "16px",
                   background: "white",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  boxShadow: "0 4px 12px rgba(99,102,241,0.06)",
                   display: "flex",
-                  flexDirection: "column"
+                  flexDirection: "column",
+                  transition: "box-shadow 0.2s"
                 }}
               >
                 <Link
                   to={`/clubs/${organizer._id}`}
                   style={{
                     textDecoration: "none",
-                    color: "#007bff",
-                    fontSize: "1.3rem",
-                    fontWeight: "bold",
-                    marginBottom: "0.5rem"
+                    color: "#6366f1",
+                    fontSize: "1.2rem",
+                    fontWeight: "700",
+                    marginBottom: "0.5rem",
+                    letterSpacing: "-0.01em"
                   }}
                 >
                   {organizer.organizerName || "Unnamed Organizer"}
@@ -165,11 +169,11 @@ function ClubsOrganizers() {
                 <span style={{
                   display: "inline-block",
                   padding: "0.25rem 0.75rem",
-                  background: "#e3f2fd",
-                  color: "#1976d2",
-                  borderRadius: "12px",
+                  background: "#ede9fe",
+                  color: "#7c3aed",
+                  borderRadius: "20px",
                   fontSize: "0.8rem",
-                  fontWeight: "bold",
+                  fontWeight: "600",
                   marginBottom: "1rem",
                   width: "fit-content"
                 }}>
@@ -177,15 +181,16 @@ function ClubsOrganizers() {
                 </span>
 
                 <p style={{
-                  color: "#666",
-                  fontSize: "0.95rem",
+                  color: "#64748b",
+                  fontSize: "0.93rem",
                   marginBottom: "1rem",
-                  flexGrow: 1
+                  flexGrow: 1,
+                  lineHeight: "1.6"
                 }}>
                   {organizer.description || "No description available"}
                 </p>
 
-                <p style={{ fontSize: "0.85rem", color: "#888", marginBottom: "1rem" }}>
+                <p style={{ fontSize: "0.85rem", color: "#94a3b8", marginBottom: "1rem" }}>
                   📧 {organizer.email}
                 </p>
 
@@ -193,13 +198,15 @@ function ClubsOrganizers() {
                   onClick={() => isFollowing ? handleUnfollow(organizer._id) : handleFollow(organizer._id)}
                   style={{
                     width: "100%",
-                    padding: "0.75rem",
-                    background: isFollowing ? "#6c757d" : "#007bff",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
+                    padding: "0.7rem",
+                    background: isFollowing ? "#f1f5f9" : "linear-gradient(135deg, #6366f1, #818cf8)",
+                    color: isFollowing ? "#475569" : "white",
+                    border: isFollowing ? "1.5px solid #e2e8f0" : "none",
+                    borderRadius: "10px",
                     cursor: "pointer",
-                    fontWeight: "bold"
+                    fontWeight: "600",
+                    fontSize: "0.9rem",
+                    transition: "all 0.15s"
                   }}
                 >
                   {isFollowing ? "✓ Following" : "+ Follow"}

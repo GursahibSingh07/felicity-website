@@ -115,8 +115,8 @@ function Signup() {
             style={{
               width: "100%",
               padding: "0.75rem",
-              borderRadius: "8px",
-              border: "1px solid #ccc",
+              borderRadius: "10px",
+              border: "1.5px solid #e2e8f0",
               fontSize: "1rem",
             }}
             required
@@ -124,7 +124,7 @@ function Signup() {
             <option value="iiit-participant">IIIT Student</option>
             <option value="non-iiit-participant">Non-IIIT Participant</option>
           </select>
-          <small style={{ color: "#666", display: "block", marginTop: "0.25rem" }}>
+          <small style={{ color: "#64748b", display: "block", marginTop: "0.25rem" }}>
             {userType === "iiit-participant"
               ? "Use your @iiit.ac.in email address"
               : "Non-IIIT participants can use any email"}
